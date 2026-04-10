@@ -1,0 +1,832 @@
+"use strict";
+
+class VideoSystemView {
+
+  // Map para guardar las ventanas abiertas por clave única (p.ej. título de ficha)
+  #ventanasAbiertas = new Map();
+
+  constructor() {
+    this.nav = document.getElementById("navID");
+    this.main = document.getElementById("mainID");
+    this.footer = document.getElementById("footerID");
+  }
+  // metodos
+
+  /**
+   * Carga al inicio 
+   * @param {*} categories 
+   * @param {*} directors 
+   * @param {*} actors 
+   * @param {*} productions 
+   */
+  init(categories, directors, actors, productions) {
+    this.showMenu(categories, directors, actors, directors);
+    this.showCategories(categories, directors, actors, productions);
+    this.showRandomProductions(productions);
+
+  };
+
+  bindNewWindow(handler) {
+    // crear evento en el main
+    this.main.addEventListener("click", (event) => {
+      // busca el botón para abrir en nueva ventana
+      const boton = event.target.closest(".newVentana");
+      if (!boton) return; // si no existe continuar la ejecución
+      event.preventDefault();
+
+      // guarda el tipo y la clave del boton
+      // se accede a través de dataset, y dataset convierte los nombres con guiones a camelCase.
+      const tipo = boton.dataset.windowType; // data-window-type en camelCase
+      const key = boton.dataset.key;
+      if (!tipo || !key) return; // si no es ninguno de los dos continuar ejecución
+
+      const datos = handler(tipo, key);
+      if (!datos) return;
+
+      // ejecutar nueva ventana según el tipo.
+
+      // ficha produccion
+      if (tipo === "production") {
+        this.showMyWindow(
+          this.showFichaProduction(datos.produccion, datos.actores, datos.directores, true),
+          // para que no se abran dos ventanas iguales
+          datos.popupKey // identificar la ventana abierta
+        );
+        return;
+      }
+
+      // ficha actor
+      if (tipo === "actor") {
+        this.showMyWindow(
+          this.showFichaActor(datos.actor, datos.productions, true),
+          // para que no se abran dos ventanas iguales
+          datos.popupKey // identificar la ventana abierta
+        );
+        return;
+      }
+
+      // ficha director
+      if (tipo === "director") {
+        this.showMyWindow(
+          this.showFichaDirector(datos.director, datos.productions, true),
+          // para que no se abran dos ventanas iguales
+          datos.popupKey // identificar la ventana abierta
+        );
+      }
+    });
+  }
+
+  /**
+   * muestra el Menu principal
+   * @param {*} categories 
+   * @param {*} directors 
+   * @param {*} actors 
+   * @param {*} productions 
+   */
+  showMenu(categories, directors, actors, productions) {
+    // mostrar menú
+    let html = "";
+    //  borra el contenido del nav
+    this.nav.replaceChildren();
+
+    html = `
+<div class="container-fluid">
+
+  <a id="inicio" class="navbar-brand" href="#">
+    <img class="navbar-brand"  src="./img/logo.png" alt="Logo" height="40" class="d-inline-block align-text-top">
+    Inicio
+  </a>
+
+  <!-- Botón hamburguesa (para pantallas pequeñas) -->
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+      
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul class="navbar-nav">`;
+
+    // Insertar Categorias, Actores, Directores, etc en un dropdown
+    html += `
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Categorías
+        </a>
+        <ul class="dropdown-menu">`;
+    for (const cat of categories) { // clase categoria
+      html += `
+          <li class="categoria"><a class="dropdown-item category-link" title="${cat.description}" href="#">${cat.name}</a></li>`;
+    }
+
+
+    html += `
+        </ul>
+      </li>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+        Directores
+        </a>
+        <ul class="dropdown-menu">`;
+
+
+    //  insertar directores en el menú
+    for (const director of directors) {
+      html += `
+          <li class="director"><a class="dropdown-item" href="#" data-key="${director.name + "_" + director.lastname1}">${director.name + " " + director.lastname1}</a></li>`;
+    }
+
+    html += `
+        </ul>
+      </li>
+
+          
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+        Actores
+        </a>
+        <ul class="dropdown-menu">`;
+
+    // Insertar Actores en el menú
+    for (const actor of actors) {
+      html += `
+          <li class="actor"><a class="dropdown-item " href="#" data-key="${actor.name + "_" + actor.lastname1}">${actor.name + " " + actor.lastname1}</a></li>`;
+
+    }
+
+    html += `
+        </ul>
+      </li>
+
+    <!-- Boton para Cerrar Todas las Ventanas -->
+    <button id="btnCerrarVentanas" class="btn btn-outline-danger">Cerrar Todas las Ventanas</button>
+    
+    </ul>
+
+
+
+  </div>
+</div>
+    `;
+
+    // insertar en el html antes del final
+    this.nav.insertAdjacentHTML("beforeend", html);
+
+  }
+
+  /**
+   * Muestra las Categorias y las producciones
+   * @param {*} categories 
+   * @param {*} directors 
+   * @param {*} actors 
+   * @param {*} productions 
+   */
+  showCategories(categories, directors, actors, productions) {
+    // ver zona central Categorias
+
+    // Borrar lo que habia antes 
+    this.main.replaceChildren();
+
+    // Mostrar categorias en el centro
+    let html = "";
+    html = `
+    <div class="container">
+    <h3 class="mb-2">Categorías:</h3>
+    <div class="row justify-content-center">
+    `;
+
+    console.log("Mostrar Categorias en Vista:");
+    for (const categoria of categories) { // clase categoria
+      html += `
+      <div class="col-6 mb-4 categoria"> 
+      <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${categoria.description}" >${categoria.name}</a>
+      </div>
+      `;
+      //  console.log(categoria.name);
+    }
+    html += `
+    </div>
+    </div>
+    `;
+
+    this.main.insertAdjacentHTML('beforeend', html);
+
+
+  }
+
+  /**
+   * Muestra 3 producciones de forma aleatoria
+   * @param {*} productions 
+   */
+  showRandomProductions(productions) {
+    // generar Producciones aleatorias y las añade a la vista
+    let html = "";
+    html = `
+    <div class="container">
+      <h3 class="mb-2">3 Producciones Aleatorias:</h3>
+      <div class="row justify-content-center">
+    `;
+
+    console.log("Mostrar 3 producciones aleatorias:");
+
+    // guarda las producciones aleatorias
+    const randomProductions = Array.from(this.getRandomProductions(productions, 3));
+    for (const produccion of randomProductions) {
+      html += `
+      <div class="col-6 mb-4 produccion" data-key="${produccion.title}">
+      <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${produccion.synopsis}">${produccion.title}</a>
+      </div>
+      `;
+      //  console.log(produccion.title);
+    }
+
+    html += `
+    </div>
+      </div>
+    `;
+
+    this.main.insertAdjacentHTML('beforeend', html);
+  }
+
+  /**
+   * recibe un array de producciones y los muestra en la vista principal
+   * @param {*} category 
+   */
+  listProductions(productions, nombreCategoria) {
+    // ver zona central Categorias
+
+    // Borrar lo que habia antes 
+    this.main.replaceChildren();
+
+    // Mostrar producciones en el centro
+    let html = "";
+    html = `
+    <div class="container">
+    <h3 class="mb-2">Producciones de ${nombreCategoria}:</h3>
+    <div class="row justify-content-center">
+    `;
+
+    console.log("Mostrar Producciones de la Categoria:");
+    for (const pro of productions) {
+      html += `
+      <div class="col-6 mb-4 produccion" data-key="${pro.title}">
+      <a href="#" class="btn btn-primary btn-lg w-100 py-2" title="${pro.synopsis}">${pro.title}</a>
+      </div>
+      `;
+      // console.log(pro.title);
+    }
+    html += `
+    </div>
+    </div>
+    `;
+
+    this.main.insertAdjacentHTML('beforeend', html);
+
+  }
+
+
+  /**
+   * enlazador para ver las producciones al clickar en una categoria
+   * @param {*} handlet 
+   */
+  bindGetProductionsInCategory(handlet) {
+    // como no existe la categoria en html, se delega al padre main
+    this.main.addEventListener("click", (event) => {
+      // buscar la clase categoria
+      const cat = event.target.closest(".categoria");
+      if (!cat) {// si no existe continuar la ejecución
+        return;
+      }
+      event.preventDefault();
+      // obtener el nombre de la categoria desde el enlace "a"
+      const nombreCat = cat.querySelector("a").textContent;
+      console.log("evento añadido a categoria: " + nombreCat);
+
+      // ejecutar listProductions, handlet();
+      this.listProductions(handlet(nombreCat), nombreCat);
+    });
+    //  lo mismo pero en la navegación
+    this.nav.addEventListener("click", (event) => {
+      // buscar la clase categoria
+      const cat = event.target.closest(".categoria");
+      if (!cat) {// si no existe continuar la ejecución
+
+        return;
+      }
+      event.preventDefault();
+      // obtener el nombre de la categoria desde el enlace "a"
+      const nombreCat = cat.querySelector("a").textContent;
+      console.log("evento añadido a categoria: " + nombreCat);
+
+      // ejecutar listProductions, handlet();
+      this.listProductions(handlet(nombreCat), nombreCat);
+    });
+  }
+
+  /**
+   * 
+   * @param {*} production 
+   * @param {*} actors 
+   * @param {*} directors 
+   * @param {*} isVentana si es false muestra botón para abrir en nueva ventana
+   */
+  showFichaProduction(production, actors, directors, isVentana = false) {
+    // ver ficha produccion
+    // ver todos los campos de la produccion y los actores y directores que intervienen en la producción
+    // #title;
+    // #nationality;
+    // #publication;
+    // #synopsis;
+    // #image;
+
+    try {
+
+
+
+      // Borrar lo que habia antes 
+      if (!isVentana) this.main.replaceChildren();
+
+      // Mostrar producciones en el centro
+      let html = "";
+      html = `
+       <div class="card shadow-lg">
+        <div class="row g-0">`;
+
+      // botón para abrir en nueva ventana, se envia directamente, la produccion, actores, y directores 
+      // cambiar los objetos por claves, los objetos me causan problemas en el history
+      if (!isVentana) {
+        html += `<button class="btn btn-outline-success mb-3 newVentana"
+            data-window-type="production" data-key="${production.title}"
+          >Mostrar en nueva ventana</button>`;
+
+      }
+
+      html += `<div class="col-md-4">
+            <img src="https://placehold.co/400x600/grey/white?text=Foto+de+la+Pelicula"
+              class="img-fluid rounded-start h-100 object-fit-cover" alt="Imagen producción">
+          </div>
+  
+          <div class="col-md-8">
+            <div class="card-body">
+  
+              <h2 class="card-title">${production.title}</h2>
+  
+              <p class="card-text">
+                <strong>Nacionalidad: </strong>${production.nationality}
+              </p>
+  
+              <p class="card-text">
+  
+              <!--  problema con las fechas, pushState las convierte a strings al serializar -->
+                <strong>Fecha de publicación: </strong>${production.publication.toLocaleDateString()}
+              </p>
+  
+              <p class="card-text">
+                <strong>Sinopsis: </strong>${production.synopsis}
+              </p>
+  
+              <hr>
+  
+              <!-- Actores -->
+              <h4>Actores:</h4>
+              <div class="row">`;
+
+      // mostrar actores
+      for (const actor of actors) {
+        html += `<div class="col-md-4 text-center mb-3 actor">
+                  <a href="#" data-key="${actor.name + "_" + actor.lastname1}" class="text-decoration-none">
+                    <p class="mb-0">${actor.name + " " + actor.lastname1}</p>
+                  </a>
+                </div>`;
+      }
+
+      html += `</div>
+  
+              <hr>
+  
+              <!-- Directores -->
+              <h4>Directores:</h4>
+              <div class="row">`;
+
+      // mostrar directores
+      for (const dir of directors) {
+        html += `<div class="col-md-4 text-center mb-3 director">
+                  <a href="#" data-key="${dir.name + "_" + dir.lastname1}" class="text-decoration-none">
+                    <p class="mb-0">${dir.name + " " + dir.lastname1}</p>
+                  </a>
+                </div>`;
+      }
+
+      html += `</div>
+  
+            </div>
+          </div>
+  
+        </div>
+      </div>
+      `;
+
+      // si se utiliza para mostrar en la pagina principal dibuja la ficha allí, sino, devuelve el html para la nueva ventana
+      if (!isVentana) {
+        this.main.insertAdjacentHTML('beforeend', html);
+      } else {
+        return html;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+
+
+  }
+
+  // enlace para el evento que muestra la ficha de la pelicula
+  bindShowFichaProduction(handler) {
+    //  se delega el evento al padre
+    this.main.addEventListener("click", (event) => {
+      const produccion = event.target.closest(".produccion");
+      if (!produccion) return;
+      event.preventDefault();
+
+      // buscar el enlace de la produccion y guardar titulo
+      const nombreProduccion = produccion.dataset.key;
+      console.log("Evento añadido a produccion: " + nombreProduccion);
+      // añadir handler
+      // como necesito el objeto produccion y los actors y directores , lo añado en un objeto
+      const datos = handler(nombreProduccion);
+      this.showFichaProduction(datos.produccion, datos.actores, datos.directores);
+    });
+
+
+  }
+
+  /**
+   * Muestra la ficha del Actor, y de las peliculas que ha participado
+   * @param {*} actor 
+   * @param {*} productions 
+   */
+  showFichaActor(actor, productions, isVentana = false) {
+    /*
+     #name;
+      #lastname1;
+      #lastname2;
+      #born;
+      #picture;
+    */
+    let html = "";
+    if (!isVentana) this.main.replaceChildren();
+
+
+    html += `
+   <div class="card shadow-lg">
+      <div class="row g-0">`;
+
+    // Botón que mostrar si no es ventana
+    if (!isVentana) {
+      html += `<button class="btn btn-outline-success mb-3 newVentana"
+       data-window-type="actor" data-key="${actor.name}_${actor.lastname1}">Mostrar en nueva ventana</button>`;
+    }
+
+
+
+    // Foto del actor
+    html += `<div class="col-md-4">
+          <img src="https://placehold.co/400x500?text=Foto+Actor" class="img-fluid rounded-start h-100 object-fit-cover"
+            alt="Foto actor">
+        </div>
+
+        <!-- Información -->
+        <div class="col-md-8">
+          <div class="card-body">
+
+            <h2 class="card-title">
+              ${actor.name + " " + actor.lastname1 + " " + actor.lastname2}
+            </h2>
+
+            <p class="card-text">
+              <strong>Fecha de nacimiento: </strong> ${actor.born.toLocaleDateString()}
+            </p>
+
+            <hr>
+
+            <!-- Producciones -->
+            <h4>Producciones: </h4>
+
+            <div class="row">`;
+
+    // mostrar producciones
+
+    for (const pro of productions) {
+      html += `
+    <div class="col-md-4 mb-4">
+      <a href="#" class="produccion" data-key="${pro.title}">
+        <div class="card h-100">
+          <img src="https://placehold.co/300x400?text=Foto+Produccion" class="card-img-top" alt="Produccion">
+          <div class="card-body">
+            <h6 class="card-title">${pro.title}</h6>
+          </div>
+        </div>
+      </a>
+    </div>
+              `;
+    }
+    html += `</div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+   `;
+
+    if (!isVentana) {
+
+      this.main.insertAdjacentHTML('beforeend', html);
+    } else {
+      return html;
+    }
+
+  }
+
+  /**
+   * enlazar el evento para mostrar Ficha Actor
+   * @param {*} handler 
+   */
+  bindShowFichaActor(handler) {
+    // escuchar en el nav (donde están los actores en el dropdown)
+    this.nav.addEventListener("click", (event) => {
+      // clase actor
+      const actor = event.target.closest(".actor");
+      if (!actor) return; // si no se crea continuar
+      event.preventDefault();
+      // guardar la key del actor, desde atributo personalizado
+      const keyActor = actor.querySelector("a").dataset.key;
+      // obtener el objeto actor y el array de producciones del actor
+      const datos = handler(keyActor);
+      // ejecutar función
+      console.log("showActor: " + datos.actor);
+      this.showFichaActor(datos.actor, datos.productions);
+
+    });
+    // escuchar también en el main 
+    this.main.addEventListener("click", (event) => {
+      // clase actor
+      const actor = event.target.closest(".actor");
+      if (!actor) return; // si no se crea continuar
+      event.preventDefault();
+      // guardar la key del actor, desde atributo personalizado
+      const keyActor = actor.querySelector("a").dataset.key;
+      // obtener el objeto actor y el array de producciones del actor
+      const datos = handler(keyActor);
+      // ejecutar función
+      console.log("showActor: " + datos.actor);
+      this.showFichaActor(datos.actor, datos.productions);
+
+    });
+  }
+
+  /**
+   * Muestra la ficha del Actor y de las peliculas que ha participado
+   * @param {*} director 
+   * @param {*} productions 
+   */
+  showFichaDirector(director, productions, isVentana = false) {
+    let html = "";
+    if (!isVentana) this.main.replaceChildren();
+
+
+    html += `
+    <div class="card shadow-lg">
+      <div class="row g-0">`;
+
+    //  botón que mostrar solo en la pantalla principal, no en la ventana
+    if (!isVentana) {
+      html += `<button class="btn btn-outline-success mb-3 newVentana"
+     data-window-type="director" data-key="${director.name}_${director.lastname1}"
+    >Mostrar en nueva ventana</button>`;
+    }
+
+    // Si hay foto se pondría aqui 
+    html += `<div class="col-md-4">
+          <img src="https://placehold.co/400x500?text=Foto+Director" class="img-fluid rounded-start h-100 object-fit-cover"
+            alt="Foto director">
+        </div>
+
+        <!-- Los datos  -->
+        <div class="col-md-8">
+          <div class="card-body">
+
+            <h2 class="card-title">
+              ${director.name + " " + director.lastname1 + " " + director.lastname2}
+            </h2>
+
+            <p class="card-text">
+              <strong>Fecha de nacimiento: </strong> ${director.born.toLocaleDateString()}
+            </p>
+
+            <hr>
+
+            <!-- Producciones -->
+            <h4>Producciones</h4>
+
+            <div class="row">`;
+
+    // Mostrar producciones
+    for (const pro of productions) {
+      html += `
+              
+              <div class="col-md-4 mb-4">
+                <a href="#" class="produccion" data-key="${pro.title}">
+                  <div class="card h-100">
+                    <img src="https://placehold.co/300x400?text=Foto+Produccion" class="card-img-top" alt="Producción">
+                    <div class="card-body">
+                      <h6 class="card-title">${pro.title}</h6>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              `;
+    }
+
+
+    html += `</div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+    `;
+
+    if (!isVentana) {
+
+      this.main.insertAdjacentHTML('beforeend', html);
+    } else {
+      return html;
+    }
+
+  }
+
+  /**
+   * 
+   * @param {*} handler 
+   */
+  bindShowFichaDirector(handler) {
+    // escuchar en el nav
+    this.nav.addEventListener("click", (event) => {
+      // clase director
+      const director = event.target.closest(".director");
+      if (!director) return; // si no se crea continuar
+      event.preventDefault();
+      // guardar la key del director, desde atributo personalizado
+      const keyDirector = director.querySelector("a").dataset.key;
+      // obtener el objeto director y el array de producciones del director
+      const datos = handler(keyDirector);
+      // ejecutar función
+      console.log("showDirector: " + datos.director);
+      this.showFichaDirector(datos.director, datos.productions);
+
+    });
+    // escuchar también en el main 
+    this.main.addEventListener("click", (event) => {
+      // clase director
+      const director = event.target.closest(".director");
+      if (!director) return; // si no se crea continuar
+      event.preventDefault();
+      // guardar la key del director, desde atributo personalizado
+      const keyDirector = director.querySelector("a").dataset.key;
+      // obtener el objeto director y el array de producciones del director
+      const datos = handler(keyDirector);
+      // ejecutar función
+      console.log("showDirector: " + datos.director);
+      this.showFichaDirector(datos.director, datos.productions);
+
+    });
+  }
+
+  /**
+   * recibe el html, crea una nueva ventana y la devuelve
+   * @param {*} html 
+   */
+  showMyWindow(html, key = null) {
+    // Si ya existe una ventana para esta clave y sigue abierta, enfocarla.
+    if (key && this.#ventanasAbiertas.has(key)) {
+      const existe = this.#ventanasAbiertas.get(key);
+      if (existe && !existe.closed) {
+        existe.focus();
+        return existe;
+      }
+      // Esa ventana ya se ha abierto, no se puede volver a abrir 
+      this.#ventanasAbiertas.delete(key);
+    }
+
+    // usa la pagina auxPage.html con un esqueleto html vacio
+    const mywindow = window.open("./auxPage.html", "_blank", "width=1000,height=600");
+
+    if (!mywindow) {
+      console.warn("No se pudo abrir la ventana: " + key);
+      return null;
+    }
+
+    // Esperar a que la ventana cargue completamente
+    mywindow.addEventListener("load", () => {
+      const main = mywindow.document.getElementById("auxMainID");
+      if (main) {
+        // insertar el html de la ficha en la nueva pagina
+        main.insertAdjacentHTML("beforeend", html);
+        console.log("Ventana Abierta: " + key);
+      }
+    });
+
+    // si no se ha abierto antes
+    if (key) {
+      this.#ventanasAbiertas.set(key, mywindow);
+      // si se cierra la ventana borrar la clave
+      mywindow.addEventListener("beforeunload", () => {
+        if (this.#ventanasAbiertas.get(key) === mywindow) {
+          console.log("Ventana cerrada: " + key);
+
+          this.#ventanasAbiertas.delete(key);
+        }
+      });
+    }
+
+    return mywindow;
+  }
+
+  // Cerrar todas las ventanas
+  closeWindows() {
+    for (const [key, ventana] of this.#ventanasAbiertas.entries()) {
+      if (ventana && !(ventana.closed)) {
+        ventana.close();
+      }
+      this.#ventanasAbiertas.delete(key);
+    }
+  }
+
+
+
+
+
+  // evento de carga de la página ejecutar el init, para ver datos
+  bindLoad(handler) {
+    window.addEventListener("DOMContentLoaded", handler, { once: true });// ejecutar solo una vez
+  }
+
+
+
+  // ver inicio, delegar evento, aun no esta creado el id Inicio, pero el nav si
+  bindInit(handler) {
+    // delegar eventos
+    this.nav.addEventListener("click", (event) => {
+      // busca en el nav el id inicio
+      const inicio = event.target.closest("#inicio");
+      if (inicio) {
+        event.preventDefault();
+        handler(); // ejecutar handler
+        return; // detiene la ejecución y continua, para no seguir evaluando
+      } // si no existe continuar ejecución
+
+      const btnCerrar = event.target.closest("#btnCerrarVentanas");
+      if (btnCerrar) {
+        event.preventDefault();
+        this.closeWindows(); // cerrar todas las ventanas
+        return;
+      }
+    });
+
+    // crear evento para cerrar ventanas
+  }
+
+  /**
+   * devuelve un set con el número de producciones pasadas por parametro
+   * @param {*} productions 
+   * @param {*} numero 
+   * @returns 
+   */
+  *getRandomProductions(productions, numero) {
+    const array = Array.from(productions);
+    const max = array.length;
+    const set = new Set();
+    //  si se ha introducido un número mal
+    if (max === 0 || numero <= 0) return;
+
+    // mientras el tamaño del set sea menos al tamaño buscado
+    while (set.size < numero) {
+      const aleatorio = Math.floor(Math.random() * max);
+      const p = array[aleatorio];
+      // si es nuevo añadirlo
+      if (!set.has(p)) {
+        set.add(p);
+        yield p;
+      }
+    }
+  }
+
+
+
+}
+
+// exportar clase
+export default VideoSystemView;
