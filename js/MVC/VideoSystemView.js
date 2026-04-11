@@ -23,9 +23,77 @@ class VideoSystemView {
     this.showMenu(categories, directors, actors, directors);
     this.showCategories(categories, directors, actors, productions);
     this.showRandomProductions(productions);
+    this.showFormulariosTema6();
 
   };
 
+  /**
+   * mostrar Formulario de añadir Production
+   */
+  showModalAddProduction() {
+
+  }
+
+  /**
+   * mostrar tres botones para abrir los tres formularios
+   * 
+   */
+  showFormulariosTema6() {
+    let html = "";
+
+    html += `
+    <div class="container my-2 p-4 bg-dark rounded">
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-12 col-md-6 text-center">
+        <h6 class="mb-3 text-white">Crear Nueva Producción</h6>
+        <div class="d-grid">
+          <button id="addProduction" class="btn btn-success py-3">
+            Crear Nueva Producción
+          </button>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 text-center">
+        <h6 class="mb-3 text-white">Borrar Producción</h6>
+        <div class="d-grid">
+          <button id="removeProduction" class="btn btn-danger py-3">
+            Borrar Producción
+          </button>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-12 text-center">
+        <h6 class="mb-3 text-white">Asignar Actores/Directores a Producción</h6>
+        <div class="d-grid">
+          <button id="asignProduction" class="btn btn-success py-3">
+            Asignar Actores/Directores
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="text-center mt-2">
+      <!-- github -->
+      <img src="./img/github.png" alt="github" width="40">
+      <a href="https://github.com/artxta/DWEC06" target="_blank" class="text-white fs-4">
+        Ver proyecto en GitHub
+      </a>
+    </div>
+  </div>
+    `;
+
+    // insertar este html antes del final
+    this.main.insertAdjacentHTML('beforeend', html);
+
+
+  }
+
+  /**
+   * manejador para abrir nueva ventana
+   * @param {*} handler 
+   */
   bindNewWindow(handler) {
     // crear evento en el main
     this.main.addEventListener("click", (event) => {
