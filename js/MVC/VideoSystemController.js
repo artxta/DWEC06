@@ -17,6 +17,7 @@ class VideoSystemController {
     this.#VIEW.bindGetProductionsInCategory(this.handleGetProductionsInCategory); // getProductionsInCategory - mostrar producciones de una categoria
     this.#VIEW.bindShowFichaProduction(this.handleShowFichaProduction); // showFichaProduction - mostrar ficha produccion
     this.#VIEW.bindNewWindow(this.handleOpenInNewWindow); // abrir fichas en nueva ventana , arreglado para history
+    this.#VIEW.bindShowModal(this.handleShowModal); // devolver datos para crear nueva produccion, borrar , asignar, etc
 
     // añadir evento del historial
     window.addEventListener("popstate", (event) => {
@@ -53,6 +54,23 @@ class VideoSystemController {
       }
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  // handle de bindShowModal
+  handleShowModal = (datos) => {
+    switch (datos) {
+      // devolver las categorias
+      case "categorias":
+        // mostrar las categorias disponibles en el modal
+        this.#VIEW.showModal("produccion", this.#MODEL.categories);
+        break;
+      case "actoresDirectores":
+        // cargar los selectores de actores y directores de la produccion
+        this.#VIEW.showModal("tresProduction", [], this.#MODEL.actors, this.#MODEL.directors);
+        break;
+      default:
+        return null;
     }
   }
 

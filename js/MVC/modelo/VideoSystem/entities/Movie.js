@@ -19,7 +19,7 @@ class Movie extends Production {
   #locations;
 
   constructor(title, nationality, publication, synopsis, image,
-    resource = {}, locations = []) {
+    resource = new Resource(0, ""), locations = []) { // Recurso con el contenido de la película.
     super(title, nationality, publication, synopsis, image);
 
     // se contruye con new

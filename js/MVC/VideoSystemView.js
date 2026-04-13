@@ -4,11 +4,19 @@ class VideoSystemView {
 
   // Map para guardar las ventanas abiertas por clave única (p.ej. título de ficha)
   #ventanasAbiertas = new Map();
+  #modalEventosVinculados = false;
 
   constructor() {
     this.nav = document.getElementById("navID");
     this.main = document.getElementById("mainID");
     this.footer = document.getElementById("footerID");
+    this.modales = document.getElementsByClassName("modalCerrar");
+    this.modalContenedor = document.querySelector("#modales");
+    // botones que se van a usa mucho
+    this.selectCategory = document.querySelector("#selectCategory");
+    this.selectActor = document.querySelector("#selectActor");
+    this.selectDirector = document.querySelector("#selectDirector");
+
   }
   // metodos
 
@@ -28,9 +36,268 @@ class VideoSystemView {
   };
 
   /**
+   * 
+   * @param {*} handle 
+   */
+  bindShowModal(handle) {
+    this.bindCloseModal();
+
+    // evento nuevaProduccion: abrir modal al pulsar el botón
+    this.main.addEventListener("click", (event) => {
+      const btnNewProduction = event.target.closest("#addProduction");
+      if (!btnNewProduction) return;
+      handle("categorias");
+    });
+
+    // listener del select de categoría 
+    if (this.selectCategory) {
+      this.selectCategory.addEventListener("change", (event) => {
+        if (event.target.value !== "") {
+          event.target.setCustomValidity("");
+          this.showModal("dosProduction");
+        } else {
+          event.target.setCustomValidity("Debe elegir una Categoria");
+        }
+      });
+    }
+
+    // listener del select de pelicula o Serie 
+    this.modalContenedor.addEventListener("change", (event) => {
+      const selectPeliculaSerie = event.target.closest("#selectPeliculaSerie");
+      if (!selectPeliculaSerie) return;
+      if (selectPeliculaSerie.value !== "") {
+        // valido
+        selectPeliculaSerie.setCustomValidity("");
+        // mostrar siguiente secuencia del fomulario de nueva Producción y cargar los actores y directores
+        handle("actoresDirectores");
+
+        // si se selecciona Serie tiene que aparecer cuadroProduccion para ver temporadas
+        if (selectPeliculaSerie.value === "SE") {
+          this.showModal("cuatroProduction");
+        } else {
+          // ocultar cuadroProduction si se elige Pelicula
+          const cuatro = document.querySelector("#modalCuatro");
+          if (cuatro) {
+            cuatro.classList.remove("d-block");
+            cuatro.classList.add("d-none");
+          }
+        }
+      } else {
+        // no valido
+        selectPeliculaSerie.setCustomValidity("Debe elegir Si es Pelicula o Serie");
+      }
+    });
+
+    // Select Actores
+    this.modalContenedor.addEventListener("change", (event) => {
+      const selectActor = event.target.closest("#selectActor");
+      if (!selectActor) return;
+      if (selectActor.value !== "") {
+        // valido
+        selectActor.setCustomValidity("");
+      } else {
+        selectActor.setCustomValidity("Debe elegir al menos un actor");
+      }
+    });
+
+    // Select Director
+    this.modalContenedor.addEventListener("change", (event) => {
+      const selectDirector = event.target.closest("#selectDirector");
+      if (!selectDirector) return;
+      if (selectDirector.value !== "") {
+        // valido
+        selectDirector.setCustomValidity("");
+      } else {
+        selectDirector.setCustomValidity("Debe elegir un Director");
+      }
+    });
+
+
+    // select actores (actores)
+    this.modalContenedor.addEventListener("click", (event) => {
+      const btnAddActores = event.target.closest("#btnAddActores");
+      if (!btnAddActores) return;
+      event.preventDefault();
+    });
+
+    // select director (solo un director)
+    this.modalContenedor.addEventListener("click", (event) => {
+      const btnAddDirectores = event.target.closest("#btnAddDirector");
+      if (!btnAddDirectores) return;
+      event.preventDefault();
+    });
+  }
+
+  /**
+   * ocultar los modales
+   */
+  closeAllModals() {
+    const modales = document.querySelectorAll(".modalContenedor, .modalCerrar");
+    modales.forEach((modal) => {
+      modal.classList.remove("d-block");
+      modal.classList.add("d-none");
+    });
+
+    // resetear select pelicula o serie
+    const selectPeliculaSerie = document.querySelector("#selectPeliculaSerie");
+    if (selectPeliculaSerie) selectPeliculaSerie.value = "";
+  }
+
+  /**
+   * crear eventos para poder cerrar los modales
+   * @returns 
+   */
+  bindCloseModal() {
+    if (this.#modalEventosVinculados || !this.modales) return;
+    this.#modalEventosVinculados = true;
+
+    this.modalContenedor.addEventListener("click", (event) => {
+      // boton cerrar
+      const btnCerrar = event.target.closest(".btnCerrar");
+      if (btnCerrar) {
+        this.closeAllModals();
+        return;
+      }
+
+      // boton cancelar
+      const cancelar = event.target.closest("#btnProduccionCancelar");
+      if (cancelar) {
+        event.preventDefault();
+        this.closeAllModals();
+        return;
+      }
+
+      // no cerrar al pulsar guardar dentro del modal
+      const guardar = event.target.closest("#btnProduccionGuardar");
+      if (guardar) {
+        event.preventDefault();
+        return;
+      }
+
+      // click fuera del modal
+      const clickFuera = event.target.classList.contains("modalContenedor");
+      if (clickFuera) {
+        this.closeAllModals();
+      }
+
+    });
+  }
+
+
+  /**
    * mostrar Formulario de añadir Production
    */
-  showModalAddProduction() {
+  showModal(formulario, categorias = [], actores = [], directores = []) {
+
+
+
+    // mostrar modal y sus secciones
+    // 
+    const showAddProduction = document.querySelector("#modalAddProduction");
+    const deleteProduction = document.querySelector("#deleteProduction");
+    const assignProduction = document.querySelector("#asignDirectorActor");
+
+
+    // botones
+    const cancelar = document.querySelector("#btnProduccionCancelar");
+    const guardar = document.querySelector("#btnProduccionGuardar");
+
+    // mostrar modal Produccion por secciones
+    const unoProduction = document.querySelector("#modalUno");
+    const dosProduction = document.querySelector("#modalDos");
+    const tresProduction = document.querySelector("#modalTres");
+    const cuatroProduction = document.querySelector("#modalCuatro");
+
+    switch (formulario) {
+      case "produccion":
+
+        showAddProduction.classList.remove("d-none");
+        showAddProduction.classList.add("d-block");
+        // deshabilitar boton Guardar hasta que se valide el formulario
+        if (guardar) {
+          guardar.disabled = true;
+        }
+
+        // cargar categorias dinamicamente
+        // usar el value la clave de la categoria
+
+        // resetear select
+        this.selectCategory.replaceChildren();
+
+        const mensaje = document.createElement("option");
+        mensaje.value = "";
+        mensaje.textContent = "--Selecciona Categoria--";
+        this.selectCategory.append(mensaje);
+
+        categorias.forEach(e => {
+          const hijo = document.createElement("option");
+          hijo.value = e.name || "";
+          hijo.textContent = e.name || "";
+          // añadir hijo
+          this.selectCategory.append(hijo);
+        });
+
+        break;
+
+
+
+      // mostrar select Peliculas o Serie
+      case "dosProduction":
+        // mostrar modalUno
+        dosProduction.classList.remove("d-none");
+        dosProduction.classList.add("d-block");
+        break;
+
+      // mostrar siguiente secuencia del modal
+      case "tresProduction":
+        // mostrar modaltres
+        tresProduction.classList.remove("d-none");
+        tresProduction.classList.add("d-block");
+
+        // resetear los select actores
+        this.selectActor.replaceChildren();
+        const placeholderActor = document.createElement("option");
+        placeholderActor.value = "";
+        placeholderActor.textContent = "--Selecciona Actor--";
+        this.selectActor.append(placeholderActor);
+
+        // crear los options de actores
+        actores.forEach(a => {
+          const option = document.createElement("option");
+          option.value = `${a.name}_${a.lastname1}`;
+          option.textContent = `${a.name} ${a.lastname1}`;
+          this.selectActor.append(option);
+        });
+
+        // resetear Select Directores
+        this.selectDirector.replaceChildren();
+        const placeholderDirector = document.createElement("option");
+        placeholderDirector.value = "";
+        placeholderDirector.textContent = "--Selecciona Director--";
+        this.selectDirector.append(placeholderDirector);
+
+        // añadir los options de directores
+        directores.forEach(d => {
+          const option = document.createElement("option");
+          option.value = `${d.name}_${d.lastname1}`;
+          option.textContent = `${d.name} ${d.lastname1}`;
+          this.selectDirector.append(option);
+        });
+        break;
+
+      // mostrar temporadas (solo Series)
+      case "cuatroProduction":
+        cuatroProduction.classList.remove("d-none");
+        cuatroProduction.classList.add("d-block");
+        break;
+
+
+
+
+    }
+
+
+
 
   }
 
