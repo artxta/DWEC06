@@ -6,6 +6,12 @@ class VideoSystemView {
   #ventanasAbiertas = new Map();
   #modalEventosVinculados = false;
 
+  // arrays para guardar datos temporales
+  #newProductionResource = [];
+  #newProductionLocation = [];
+  #newProductionActors = [];
+  #newProductionDirectors = [];
+
   constructor() {
     this.nav = document.getElementById("navID");
     this.main = document.getElementById("mainID");
@@ -53,13 +59,22 @@ class VideoSystemView {
     if (this.selectCategory) {
       this.selectCategory.addEventListener("change", (event) => {
         if (event.target.value !== "") {
+          console.log(`Categoria Seleccionada: ${event.target.value}`);
           event.target.setCustomValidity("");
           this.showModal("dosProduction");
         } else {
           event.target.setCustomValidity("Debe elegir una Categoria");
         }
+        this.#checkFormValidity();
       });
     }
+
+    // listener campos titulo, publication y seasons
+    this.modalContenedor.addEventListener("input", (event) => {
+      const campo = event.target.closest("#titulo, #publication, #seasons");
+      if (!campo) return;
+      this.#checkFormValidity();
+    });
 
     // listener del select de pelicula o Serie 
     this.modalContenedor.addEventListener("change", (event) => {
@@ -68,6 +83,7 @@ class VideoSystemView {
       if (selectPeliculaSerie.value !== "") {
         // valido
         selectPeliculaSerie.setCustomValidity("");
+        console.log(`Tipo seleccionado: ${selectPeliculaSerie.value}`);
         // mostrar siguiente secuencia del fomulario de nueva Producción y cargar los actores y directores
         handle("actoresDirectores");
 
@@ -86,10 +102,7 @@ class VideoSystemView {
         // no valido
         selectPeliculaSerie.setCustomValidity("Debe elegir Si es Pelicula o Serie");
       }
-    });
-
-    // Select Actores
-    this.modalContenedor.addEventListener("change", (event) => {
+      this.#checkFormValidity();
       const selectActor = event.target.closest("#selectActor");
       if (!selectActor) return;
       if (selectActor.value !== "") {
@@ -113,19 +126,229 @@ class VideoSystemView {
     });
 
 
-    // select actores (actores)
+    // boton añadir resource
+    this.modalContenedor.addEventListener("click", (event) => {
+      const addResource = event.target.closest("#btnAddResource");
+      if (!addResource) return;
+      event.preventDefault();
+
+      // guardar duracion y link, tiene que estar los dos, 
+      // si es null el operador de encadenamiento opcional ? arregla poblemas que pueda haber 
+      const duration = document.querySelector("#duration")?.value;
+      const link = document.querySelector("#link")?.value;
+      if (!duration && !link) return;
+
+      // saber si es pelicula o Serie, 
+      // Si es pelicula solo guarda un Resource, si es serie guarda un array de resources
+      const tipo = document.querySelector("#selectPeliculaSerie")?.value;
+      const resource = { duration, link };
+
+      // si es pelicula solo puede haber un resource, guarda en array #newProductionResource
+      if (tipo === "MO") {
+        this.#newProductionResource = [resource];
+      } else {
+        // si es serie añadir al array
+        this.#newProductionResource.push(resource);
+      }
+
+      // mostrar los resources seleccionados
+      const contenedor = document.querySelector(".resourcesSeleccionados");
+      if (contenedor) {
+        contenedor.replaceChildren();
+        this.#newProductionResource.forEach((r, i) => {
+          const span = document.createElement("span");
+          // estilo etiqueta tipo capsula
+          span.className = "badge bg-secondary me-1 mt-1";
+          span.textContent = `Resource ${i + 1}: ${r.duration}min - ${r.link}`;
+          contenedor.append(span);
+        });
+      }
+      this.#checkFormValidity();
+    });
+
+    // boton borrar resource
+    this.modalContenedor.addEventListener("click", (event) => {
+      const deleteResource = event.target.closest("#btnDeleteResource");
+      if (!deleteResource) return;
+      event.preventDefault();
+      // vaciar array
+      this.#newProductionResource = [];
+      const contenedor = document.querySelector(".resourcesSeleccionados");
+      // quitar del html
+      if (contenedor) contenedor.replaceChildren();
+      this.#checkFormValidity();
+    });
+
+    // boton añadir location
+    this.modalContenedor.addEventListener("click", (event) => {
+      const addLocation = event.target.closest("#btnAddLocation");
+      if (!addLocation) return;
+      event.preventDefault();
+
+      // Guardar locations en array #newProductionLocation
+      const latitude = document.querySelector("#latitude")?.value;
+      const longitude = document.querySelector("#longitude")?.value;
+      if (!latitude && !longitude) return;
+      // guardar en objeto
+      const location = { latitude, longitude };
+
+      // añadir al array
+      this.#newProductionLocation.push(location);
+
+      // mostrar las locations
+      const contenedor = document.querySelector(".locationsSeleccionadas");
+      if (contenedor) {
+        contenedor.replaceChildren();// borrar contenido anterior
+        this.#newProductionLocation.forEach((location, index) => {
+          const span = document.createElement("span");
+          span.className = "badge bg-secondary me-1 mt-1";
+          span.textContent = `Location ${index + 1}: Latitude ${location.latitude}º , Longitude ${location.longitude}º`;
+          contenedor.append(span);
+        });
+      }
+    });
+
+    // boton borrar location
+    this.modalContenedor.addEventListener("click", (event) => {
+      const deleteLocation = event.target.closest("#btnDeleteLocation");
+      if (!deleteLocation) return;
+      event.preventDefault();
+      // vaciar array
+      this.#newProductionLocation = [];
+      const contenedor = document.querySelector(".locationsSeleccionadas");
+      // quitar del html
+      if (contenedor) contenedor.replaceChildren();
+    });
+
+    // boton select actores 
     this.modalContenedor.addEventListener("click", (event) => {
       const btnAddActores = event.target.closest("#btnAddActores");
       if (!btnAddActores) return;
       event.preventDefault();
+
+      // guardar actores en array #newProductionActors
+      const selectActor = document.querySelector("#selectActor");
+      const clave = selectActor.value; // clave 
+      const nombre = selectActor.options[selectActor.selectedIndex].text; // nombre visible
+
+      if (clave === "") return; // si no se ha seleccionado nada salir
+      // si ya existe el actor no añadir
+      const existeActor = this.#newProductionActors.some((actor) => actor.clave === clave);
+      if (existeActor) return;
+
+      const actorSeleccionado = { clave, nombre };
+
+      // añadir al array
+      this.#newProductionActors.push(actorSeleccionado);
+
+      // mostrar los actores seleccionados
+      const contenedor = document.querySelector(".actoresSeleccionados");
+      if (contenedor) {
+        contenedor.replaceChildren(); // borrar contenido anterior
+        // mostrar los actores seleccionados
+        this.#newProductionActors.forEach((actor, index) => {
+          const span = document.createElement("span");
+          span.className = "badge bg-secondary me-1 mt-1";
+          span.textContent = `Actor ${index + 1}:   ${actor.nombre}`;
+          contenedor.append(span);
+        });
+      }
+      this.#checkFormValidity();
     });
 
-    // select director (solo un director)
+    // boton borrar actores
+    this.modalContenedor.addEventListener("click", (event) => {
+      const btnDeleteActores = event.target.closest("#btnDeleteActores");
+      if (!btnDeleteActores) return;
+      event.preventDefault();
+      // vaciar array
+      this.#newProductionActors = [];
+      const contenedor = document.querySelector(".actoresSeleccionados");
+      // limpiar del html
+      if (contenedor) contenedor.replaceChildren();
+      this.#checkFormValidity();
+    });
+
+    // boton select director 
     this.modalContenedor.addEventListener("click", (event) => {
       const btnAddDirectores = event.target.closest("#btnAddDirector");
       if (!btnAddDirectores) return;
       event.preventDefault();
+
+      const selectDirector = document.querySelector("#selectDirector");
+      if (!selectDirector) return;
+
+      const clave = selectDirector.value;
+      console.log(`Director Seleccionado: ${clave}`);
+      if (clave === "") return;
+
+      const nombre = selectDirector.options[selectDirector.selectedIndex].text;
+      const existeDirector = this.#newProductionDirectors.some((director) => director.clave === clave);
+      if (existeDirector) return;
+      // guardar objeto 
+      const directorSeleccionado = { clave, nombre };
+      this.#newProductionDirectors.push(directorSeleccionado);
+
+      const contenedor = document.querySelector(".directoresSeleccionados");
+      if (contenedor) {
+        contenedor.replaceChildren();
+        this.#newProductionDirectors.forEach((director, index) => {
+          const span = document.createElement("span");
+          span.className = "badge bg-secondary me-1 mt-1";
+          span.textContent = `Director ${index + 1}: ${director.nombre}`;
+          contenedor.append(span);
+        });
+      }
+      this.#checkFormValidity();
     });
+
+    // boton borrar director
+    this.modalContenedor.addEventListener("click", (event) => {
+      const btnDeleteDirector = event.target.closest("#btnDeleteDirector");
+      if (!btnDeleteDirector) return;
+      event.preventDefault();
+      // vaciar array
+      this.#newProductionDirectors = [];
+      const contenedor = document.querySelector(".directoresSeleccionados");
+      // limpiar html
+      if (contenedor) contenedor.replaceChildren();
+      this.#checkFormValidity();
+    });
+
+  }
+
+  /**
+   * Comprueba los campos obligatorios si todo ok habilita el botón Guardar
+   */
+  #checkFormValidity() {
+    const guardar = document.querySelector("#btnProduccionGuardar");
+    if (!guardar) return;
+
+    const categoria = document.querySelector("#selectCategory")?.value;
+    const tipo = document.querySelector("#selectPeliculaSerie")?.value;
+    const titulo = document.querySelector("#titulo")?.value.trim();
+    const publication = document.querySelector("#publication")?.value;
+
+    // convertir a booleanos
+    const categoriaOk = !!categoria;
+    const tipoOk = !!tipo;
+    const tituloOk = !!titulo;
+    const publicationOk = !!publication;
+    const resourceOk = this.#newProductionResource.length > 0;
+    const actoresOk = this.#newProductionActors.length > 0;
+    const directoresOk = this.#newProductionDirectors.length > 0;
+
+    // si es serie
+    let seasonsOk = true;
+    if (tipo === "SE") {
+      const seasons = document.querySelector("#seasons")?.value;
+      seasonsOk = !!seasons;
+    }
+
+    // habilita botón Guardar si los campos obligatorios son validos
+    const valido = categoriaOk && tipoOk && tituloOk && publicationOk;
+
+    guardar.disabled = !valido;
   }
 
   /**
