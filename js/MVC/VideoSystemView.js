@@ -870,7 +870,7 @@ class VideoSystemView {
     <div class="row justify-content-center">
     `;
 
-    console.log("Mostrar Producciones de la Categoria:");
+    // console.log("Mostrar Producciones de la Categoria:");
     for (const pro of productions) {
       html += `
       <div class="col-6 mb-4 produccion" data-key="${pro.title}">
@@ -966,7 +966,7 @@ class VideoSystemView {
       }
 
       html += `<div class="col-md-4">
-            <img src="https://placehold.co/400x600/grey/white?text=Foto+de+la+Pelicula"
+            <img src="https://placehold.co/400x600/grey/white?text=${production.image}"
               class="img-fluid rounded-start h-100 object-fit-cover" alt="Imagen producción">
           </div>
   
@@ -987,9 +987,17 @@ class VideoSystemView {
   
               <p class="card-text">
                 <strong>Sinopsis: </strong>${production.synopsis}
-              </p>
-  
-              <hr>
+              </p>`;
+
+      // si tiene capitulos mostrarlos
+      if (production.seasons) {
+        html += `<!-- capitulos -->
+              <p class="card-text">
+                <strong>Capitulos: </string>${production.seasons}
+              </p>`;
+      }
+
+      html += `<hr>
   
               <!-- Actores -->
               <h4>Actores:</h4>
@@ -1019,6 +1027,36 @@ class VideoSystemView {
                     <p class="mb-0">${dir.name + " " + dir.lastname1}</p>
                   </a>
                 </div>`;
+      }
+
+      // mostrar locations
+      if (production.locations && production.locations.length > 0) {
+        html += `<hr>
+                <h4>Locations:</h4>
+                <div class="row">`;
+
+        production.locations.forEach((loc, index) => {
+          html += `<div class="col-md-4 text-center mb-3">
+                    <p class="mb-0">Location ${index + 1}: Latitude ${loc.latitude}º , Longitude ${loc.longitude}º</p>
+                  </div>`;
+        });
+      }
+
+      // mostrar resources
+      // mostrar detalles producción
+      // console.warn("Detalles de la producción:");
+      // console.dir(production);
+      // si tiene resources mostrarlos
+      if (production.resource && production.resource.length > 0) {
+        html += `<hr>
+                <h4>Resources:</h4>
+                <div class="row">`;
+
+        production.resource.forEach((res, index) => {
+          html += `<div class="col-md-4 text-center mb-3">
+                    <p class="mb-0">Resource ${index + 1}: Duration ${res.duration}min , Link: ${res.link}</p>
+                  </div>`;
+        });
       }
 
       html += `</div>
@@ -1125,7 +1163,7 @@ class VideoSystemView {
     <div class="col-md-4 mb-4">
       <a href="#" class="produccion" data-key="${pro.title}">
         <div class="card h-100">
-          <img src="https://placehold.co/300x400?text=Foto+Produccion" class="card-img-top" alt="Produccion">
+          <img src="https://placehold.co/300x400?text=${pro.image}" class="card-img-top" alt="Produccion">
           <div class="card-body">
             <h6 class="card-title">${pro.title}</h6>
           </div>
@@ -1242,7 +1280,7 @@ class VideoSystemView {
               <div class="col-md-4 mb-4">
                 <a href="#" class="produccion" data-key="${pro.title}">
                   <div class="card h-100">
-                    <img src="https://placehold.co/300x400?text=Foto+Produccion" class="card-img-top" alt="Producción">
+                    <img src="https://placehold.co/300x400?text=${pro.image}" class="card-img-top" alt="Producción">
                     <div class="card-body">
                       <h6 class="card-title">${pro.title}</h6>
                     </div>
@@ -1409,7 +1447,7 @@ class VideoSystemView {
    * @param {*} numero 
    * @returns 
    */
-  *getRandomProductions(productions, numero) {
+  * getRandomProductions(productions, numero) {
     const array = Array.from(productions);
     const max = array.length;
     const set = new Set();

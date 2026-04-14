@@ -163,9 +163,13 @@ class VideoSystemController {
         for (const actorVista of datosGuardar.actores) {
           //  si el la clave del actor coincide con el value de la vista(se ha usado la clave)
           // asignar ese actor a la producción
-          if (`${actor.name}_${actor.lastname1}` === actorVista.value) {
+          // comprobar entrada
+          //console.log(`Comparando actor: ${actor.name}_${actor.lastname1} con ${actorVista.value}`);
+          // comparar claves
+          if (`${actor.name}_${actor.lastname1}` === actorVista.clave) {
             // asignar actor a pelicula
             this.#MODEL.assignActor(actor, produccionGuardada);
+            console.log(`Actor ${actor.name} ${actor.lastname1} asignado a la producción ${produccionGuardada.title}`);
           }
         }
       }
@@ -175,18 +179,21 @@ class VideoSystemController {
         for (const dirVista of datosGuardar.directores) {
           //  si la clave del director coincide cn la clave usada en la vista 
           // assignar ese director a la producción
-          if (`${director.name}_${director.lastname1}` === dirVista.value) {
+          //console.log(`Comparando director: ${director.name}_${director.lastname1} con ${dirVista.value}`);
+          // comparar claves
+          if (`${director.name}_${director.lastname1}` === dirVista.clave) {
             // assignar director a la pelicula
             this.#MODEL.assignDirector(director, produccionGuardada);
+            console.log(`Director ${director.name} ${director.lastname1} asignado a la producción ${produccionGuardada.title}`);
           }
         }
       }
 
       // test Ver casting de la pelicula
-      console.log("Ver Casting de la Nueva Producción: ")
-      for (const a of this.#MODEL.getCast(produccionGuardada)) {
-        console.log(`${a.name}`);
-      }
+      // console.log("Ver Casting de la Nueva Producción: ")
+      // for (const a of this.#MODEL.getCast(produccionGuardada)) {
+      //   console.log(`${a.name}`);
+      // }
 
       let resource = "";
       let location = "";
@@ -577,28 +584,31 @@ class VideoSystemController {
    */
   onLoad = (datos) => {
     /*
-  estructura de datos
-   
-  const datos = {
-  users: [ {username: "",email: "",pass: ""},],
-  categories: [
-    {
-      name: "",
-      description: "",
-      productions: [
+    estructura de datos
+    
+    const datos = {
+      users: [ {username: "",email: "",pass: ""},],
+      categories: [
         {
-          title: "",
-          fecha: new Date(),
-          nac: "",
-          synopsis: "",
-          actores: [ { name: "", lastN: "", born: new Date() }, ],
-          director: [ { name: "", lastN: "", born: new Date() },]
-        }, 
-      ]
-    },
-  ],
-  };
-  */
+          name: "",
+          description: "",
+          productions: [
+            {
+              title: "",
+              publication: "2026-01-01",
+              nationality: "",
+              synopsis: "",
+              image: "",
+              actors: [ { name: "", lastname1: "", born: "1990-01-01" }, ],
+              directors: [ { name: "", lastname1: "", born: "1990-01-01" },],
+              resources: [{ duration: "90", link: "pelicula_La_Cosa.avi" },],
+              locations: [{ latitude: "37.99", longitude: "-1.15" },],
+            }, 
+          ]
+        },
+      ],
+    };
+    */
     try {
 
       const users = datos.users;
