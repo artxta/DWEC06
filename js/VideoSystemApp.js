@@ -29,7 +29,7 @@ const VideoSystemApp = new VideoSystemController(
 
 // Estructura de Datos de VideoSystem, tipo JSON
 
-
+//  se han cambiado las fechas de new Date a tipo YYYY-MM-DD
 const datos = {
   users: [
     {
@@ -48,82 +48,82 @@ const datos = {
         {
           // La cosa
           title: "La Cosa",
-          fecha: new Date(1982, 5, 25),
-          nac: "EEUU",
+          publication: "1982-06-25",
+          nationality: "EEUU",
           synopsis: "Extraterrestres parasitos que cambiar de forma",
-          actores: [
+          actors: [
             // La cosa
-            { name: "Kurt", lastN: "Russel", born: new Date(1962, 5, 25) },
-            { name: "Wilford", lastN: "Brimley", born: new Date(1960, 3, 3) },
+            { name: "Kurt", lastname1: "Russel", born: "1962-06-25" },
+            { name: "Wilford", lastname1: "Brimley", born: "1960-04-03" },
           ],
-          director: [
+          directors: [
             // La cosa
-            { name: "John", lastN: "Carpenter", born: new Date(1950, 4, 3) },
+            { name: "John", lastname1: "Carpenter", born: "1950-05-03" },
           ]
         },
 
         {
           // La mosca
           title: "La Mosca",
-          fecha: new Date(1986, 1, 1),
-          nac: "EEUU",
+          publication: "1986-02-01",
+          nationality: "EEUU",
           synopsis: "Un cientifico se utiliza como cobaya y se convierte en mosca",
-          actores: [
+          actors: [
             // La mosca
-            { name: "Jeff", lastN: "Goldblum", born: new Date(1950, 2, 2) },
-            { name: "Geena", lastN: "Davis", born: new Date(1950, 3, 2) },
+            { name: "Jeff", lastname1: "Goldblum", born: "1950-03-02" },
+            { name: "Geena", lastname1: "Davis", born: "1950-04-02" },
           ],
-          director: [
+          directors: [
             // La mosca
-            { name: "David", lastN: "Cronenberg", born: new Date(1939, 3, 4) },
+            { name: "David", lastname1: "Cronenberg", born: "1939-04-04" },
           ]
         },
         {
           // Coraline
           title: "Coraline",
-          fecha: new Date(2009, 1, 6),
-          nac: "CANADA",
+          publication: "2009-02-06",
+          nationality: "CANADA",
           synopsis: "Pelicula de fantasia oscura",
-          actores: [
+          actors: [
             // Coraline
-            { name: "Dakota", lastN: "Fanning", born: new Date(1969) },
-            { name: "Teri", lastN: "Hatcher", born: new Date(1980) },
+            { name: "Dakota", lastname1: "Fanning", born: "1969-01-01" },
+            { name: "Teri", lastname1: "Hatcher", born: "1980-01-01" },
           ],
-          director: [
+          directors: [
             // Coraline
-            { name: "Henry", lastN: "Selick", born: new Date(1939) },
+            { name: "Henry", lastname1: "Selick", born: "1939-01-01" },
           ]
         },
         {
           // Bitelchús
           title: "Bitelchús",
-          fecha: new Date(1988, 2, 1),
-          nac: "EEUU",
+          publication: "1988-03-01",
+          nationality: "EEUU",
           synopsis: "Un matrimonio de fantasmas contrata a bitelchus",
-          actores: [
+          actors: [
             // Bitelchus
-            { name: "Michael", lastN: "Keaton", born: new Date(1949, 3, 4) },
-            { name: "Winona", lastN: "Ryder", born: new Date(1980, 4, 2) },
+            { name: "Michael", lastname1: "Keaton", born: "1949-04-04" },
+            { name: "Winona", lastname1: "Ryder", born: "1980-05-02" },
           ],
-          director: [
+          directors: [
             // bitelchus
-            { name: "Tim", lastN: "Burton", born: new Date(1958, 8, 25) },
+            { name: "Tim", lastname1: "Burton", born: "1958-09-25" },
           ]
         },
         {
           // La novia Cadaver
           title: "La novia Cadaver",
-          fecha: new Date(2005, 23, 10),
-          nac: "EEUU",
+          publication: "2005-12-10",
+          nationality: "EEUU",
           synopsis: "Cuenta la historia de un muchacho virtuoso e inteligente llamado Victor Van Dort",
-          actores: [
+          actors: [
             // La novia Cadaver
-            { name: "John", lastN: "Depp", born: new Date(1963, 9, 5) },
-            { name: "Helena", lastN: "Bonham", born: new Date(1966, 4, 26) },
+            { name: "John", lastname1: "Depp", born: "1963-10-05" },
+            { name: "Helena", lastname1: "Bonham", born: "1966-05-26" },
           ],
-          director: [
+          directors: [
             // La novia cadaver
-            { name: "Tim", lastN: "Burton", born: new Date(1958, 8, 25) },
+            { name: "Tim", lastname1: "Burton", born: "1958-09-25" },
           ]
         },
 
@@ -138,69 +138,69 @@ const datos = {
         {
           // Dos tontos muy tontos
           title: "Los Simpsons",
-          fecha: new Date(1989, 1, 1),
-          nac: "EEUU",
+          publication: "1989-02-01",
+          nationality: "EEUU",
           synopsis: "Una familia de dibujos muy divertida",
           image: "",
           resources: [],
           locations: [],
           seasons: 40,
-          actores: [
+          actors: [
             // Dos tontos muy tontos
-            { name: "Jim", lastN: "Carrey", born: new Date(1962, 0, 17) },
-            { name: "Jeff", lastN: "Daniels", born: new Date(1960, 2, 3) },
+            { name: "Jim", lastname1: "Carrey", born: "1962-01-17" },
+            { name: "Jeff", lastname1: "Daniels", born: "1960-03-03" },
           ],
-          director: [
+          directors: [
             // Dos tontos muy tontos
-            { name: "Mat", lastN: "Groening", born: new Date(1949, 2, 3) },
+            { name: "Mat", lastname1: "Groening", born: "1949-03-03" },
           ]
         },
         {
           // Algo pasa con Mary
           title: "Algo pasa con Mary",
-          fecha: new Date(1998, 3, 1),
-          nac: "EEUU",
+          publication: "1998-04-01",
+          nationality: "EEUU",
           synopsis: "Ted desea a la chica que todos desean",
-          actores: [
+          actors: [
             // Algo pasa con mary
-            { name: "Cameron", lastN: "Diaz", born: new Date(1972, 8, 30) },
-            { name: "Ben", lastN: "Stiller", born: new Date(1970, 1, 1) },
+            { name: "Cameron", lastname1: "Diaz", born: "1972-09-30" },
+            { name: "Ben", lastname1: "Stiller", born: "1970-02-01" },
           ],
-          director: [
+          directors: [
             // Algo pasa con mary
-            { name: "Peter", lastN: "Farrelly", born: new Date(1949, 2, 3) }, // repetido
+            { name: "Peter", lastname1: "Farrelly", born: "1949-03-03" }, // repetido
           ]
         },
         {
           // Ave Ventura
           title: "Ace Ventura",
-          fecha: new Date(1994, 1, 1),
-          nac: "EEUU",
+          publication: "1994-02-01",
+          nationality: "EEUU",
           synopsis: "Ace Ventura detective de mascotas",
-          actores: [
+          actors: [
             // Ace ventura
-            { name: "Jim", lastN: "Carrey", born: new Date(1962, 0, 17) }, // repetido
-            { name: "Sean", lastN: "Young", born: new Date(1933) },
+            { name: "Jim", lastname1: "Carrey", born: "1962-01-17" }, // repetido
+            { name: "Sean", lastname1: "Young", born: "1933-01-01" },
           ],
-          director: [
+          directors: [
             // Ace Ventura
-            { name: "Tom", lastN: "Shadyac", born: new Date(1960, 1, 1) },
+            { name: "Tom", lastname1: "Shadyac", born: "1960-02-01" },
           ]
         },
         {
           // Al diablo con el diablo
           title: "Al diablo con el diablo",
-          fecha: new Date(2000, 1, 1),
-          nac: "EEUU",
+          publication: "2000-02-01",
+          nationality: "EEUU",
           synopsis: "Un joven se enamora de su compañera y vende su alma para conquistarla",
-          actores: [
+          actors: [
             // Al diablo con el diablo
-            { name: "Brendan", lastN: "Fraser", born: new Date(1939, 2, 2) },
-            { name: "Elizabeth", lastN: "Hurley", born: new Date(1970) },
+            { name: "Brendan", lastname1: "Fraser", born: "1939-03-02" },
+            { name: "Elizabeth", lastname1: "Hurley", born: "1970-01-01" },
           ],
-          director: [
+          directors: [
             // Al diablo con el diablo
-            { name: "Harold", lastN: "Ramis", born: new Date(1939, 1, 1) },
+            { name: "Harold", lastname1: "Ramis", born: "1939-02-01" },
           ]
         },
       ]
@@ -213,96 +213,96 @@ const datos = {
         {
           // Pactor con el Diablo
           title: "Pactar con el Diablo",
-          fecha: new Date(1997, 1, 1),
-          nac: "EEUU",
+          publication: "1997-02-01",
+          nationality: "EEUU",
           synopsis: "Un abogado muy bueno es contratado por el diablo",
-          actores: [
+          actors: [
             // Pactar con el diablo
-            { name: "Keanu", lastN: "Reeves", born: new Date(1964, 8, 2) },
-            { name: "Al", lastN: "Pacino", born: new Date(1939, 3, 3) },
+            { name: "Keanu", lastname1: "Reeves", born: "1964-09-02" },
+            { name: "Al", lastname1: "Pacino", born: "1939-04-03" },
           ],
-          director: [
+          directors: [
             // Pactar con el diablo
-            { name: "Taylor", lastN: "Hackford", born: new Date(1939, 2, 2) },
+            { name: "Taylor", lastname1: "Hackford", born: "1939-03-02" },
           ]
 
         },
         {
           // John Wick
           title: "John Wick",
-          fecha: new Date(2014, 1, 1),
-          nac: "EEUU",
+          publication: "2014-02-01",
+          nationality: "EEUU",
           synopsis: "John Wick Era un huérfano que fue acogido por el sindicato del crimen Ruska Roma, donde fue criado como un asesino, y finalmente se convirtió en el principal ejecutor de la mafia rusa,",
-          actores: [
-            { name: "Keanu", lastN: "Reeves", born: new Date(1964, 8, 2) },
-            { name: "Brendan", lastN: "Fraser", born: new Date(1939, 2, 2) },
+          actors: [
+            { name: "Keanu", lastname1: "Reeves", born: "1964-09-02" },
+            { name: "Brendan", lastname1: "Fraser", born: "1939-03-02" },
 
           ],
-          director: [
-            { name: "Chad", lastN: "Stahelski", born: new Date(1960, 2, 2) },
+          directors: [
+            { name: "Chad", lastname1: "Stahelski", born: "1960-03-02" },
           ]
         },
         {
           // Matrix
           title: "Matrix",
-          fecha: new Date(1999, 11, 31),
-          nac: "EEUU",
+          publication: "1999-12-31",
+          nationality: "EEUU",
           synopsis: "El futuro tras una guerra con las maquinas",
-          actores: [
+          actors: [
             // Matrix
-            { name: "Keanu", lastN: "Reeves", born: new Date(1964, 8, 2) },
-            { name: "Laurence", lastN: "Fishburne", born: new Date(1950, 2, 2) },
+            { name: "Keanu", lastname1: "Reeves", born: "1964-09-02" },
+            { name: "Laurence", lastname1: "Fishburne", born: "1950-03-02" },
           ],
-          director: [
+          directors: [
             // Matrix
-            { name: "Hermanas", lastN: "Wachowski", born: new Date(1959, 1, 1) },
+            { name: "Hermanas", lastname1: "Wachowski", born: "1959-02-01" },
           ]
 
         },
         {
           // The Terminator
           title: "The Terminator",
-          fecha: new Date(1984, 1, 1),
-          nac: "EEUU",
+          publication: "1984-02-01",
+          nationality: "EEUU",
           synopsis: "Un robot va buscando a Sara Conor toda la pelicula",
-          actores: [
+          actors: [
             // Terminator
-            { name: "Arnold", lastN: "Schwarzenegger", born: new Date(1969, 2, 2) },
-            { name: "Linda", lastN: "Hamilton", born: new Date(1970, 2, 2) },
+            { name: "Arnold", lastname1: "Schwarzenegger", born: "1969-03-02" },
+            { name: "Linda", lastname1: "Hamilton", born: "1970-03-02" },
           ],
-          director: [
+          directors: [
             // the terminator
-            { name: "James", lastN: "Cameron", born: new Date(1970, 3, 3) },
+            { name: "James", lastname1: "Cameron", born: "1970-04-03" },
           ]
         },
         {
           // Desafio Total
           title: "Desafio Total",
-          fecha: new Date(1990, 1, 1),
-          nac: "EEUU",
+          publication: "1990-02-01",
+          nationality: "EEUU",
           synopsis: "Un Espia que no sabe que lo es viaja a Marte",
-          actores: [
+          actors: [
             // Desafio Total
-            { name: "Arnold", lastN: "Schwarzenegger", born: new Date(1969, 2, 2) },
-            { name: "Rachel", lastN: "Ticotin", born: new Date(1970, 1, 1) },
+            { name: "Arnold", lastname1: "Schwarzenegger", born: "1969-03-02" },
+            { name: "Rachel", lastname1: "Ticotin", born: "1970-02-01" },
           ],
-          director: [
+          directors: [
             // Desafio Total
-            { name: "Paul", lastN: "Verhoeven", born: new Date(1990, 1, 1) },
+            { name: "Paul", lastname1: "Verhoeven", born: "1990-02-01" },
           ]
         },
         {
           // Instinto Basico
           title: "Instinto Básico",
-          fecha: new Date(1992, 1, 1),
-          nac: "EEUU",
+          publication: "1992-02-01",
+          nationality: "EEUU",
           synopsis: "Al comienzo, Johnny Boz, una estrella del rock retirada, está haciendo el amor con una rubia, y ella lo mata, inmovilizándole primero",
-          actores: [
-            { name: "Sharon", lastN: "Stone", born: new Date(1958, 2, 10) },
-            { name: "Michael", lastN: "Douglas", born: new Date(1944, 8, 15) },
+          actors: [
+            { name: "Sharon", lastname1: "Stone", born: "1958-03-10" },
+            { name: "Michael", lastname1: "Douglas", born: "1944-09-15" },
           ],
-          director: [
-            { name: "Paul", lastN: "Verhoeven", born: new Date(1990, 1, 1) },
+          directors: [
+            { name: "Paul", lastname1: "Verhoeven", born: "1990-02-01" },
           ]
         },
       ]
@@ -322,11 +322,11 @@ const datos = {
       productions: [
         {
           title: "",
-          fecha: new Date(),
-          nac: "",
+          publication: "2026-01-01",
+          nationality: "",
           synopsis: "",
-          actores: [ { name: "", lastN: "", born: new Date() }, ],
-          director: [ { name: "", lastN: "", born: new Date() },]
+          actors: [ { name: "", lastname1: "", born: "1990-01-01" }, ],
+          directors: [ { name: "", lastname1: "", born: "1990-01-01" },]
         }, 
       ]
     },

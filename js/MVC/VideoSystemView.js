@@ -22,6 +22,10 @@ class VideoSystemView {
     this.selectCategory = document.querySelector("#selectCategory");
     this.selectActor = document.querySelector("#selectActor");
     this.selectDirector = document.querySelector("#selectDirector");
+    this.btnGuardar = document.querySelector("#btnProduccionGuardar");
+
+    // La operación se ha completado
+    this.modalMostrarResultado = document.querySelector("#modalMostrarResultado");
 
   }
   // metodos
@@ -40,6 +44,58 @@ class VideoSystemView {
     this.showFormulariosTema6();
 
   };
+
+  // guardar nueva producción
+  bindSaveProduction(handle) {
+    try {
+      this.btnGuardar.addEventListener("click", (event) => {
+        event.preventDefault();
+        const datos = {
+          categoria: document.querySelector("#selectCategory")?.value,
+          tipo: document.querySelector("#selectPeliculaSerie")?.value,
+          titulo: document.querySelector("#titulo")?.value,
+          nacionalidad: document.querySelector("#nationality")?.value,
+          publication: document.querySelector("#publication")?.value,
+          synopsis: document.querySelector("#synopsis")?.value,
+          imageName: document.querySelector("#image")?.files[0]?.name || null,
+          seasons: document.querySelector("#seasons")?.value || 0,
+          resources: this.#newProductionResource,
+          locations: this.#newProductionLocation,
+          actores: this.#newProductionActors,
+          directores: this.#newProductionDirectors
+        };
+        console.log("Nueva Producción -Vista-: ");
+        console.dir(datos);
+        handle(datos);
+        // this.closeAllModals();
+      });
+
+    } catch (e) {
+      this.showResultadoModal("mostrar", `Ha ocurrido un error: ` + e);
+    }
+  }
+
+
+  /**
+   * Muestra un modal con la información
+   * @param {*} estado si es "mostrar" muestra el modal, si es "ocultar" lo oculta
+   * @param {*} mensaje  muestra un mensaje tiene que estar en html
+   */
+  showResultadoModal(estado, mensaje = "") {
+    const mens = this.modalMostrarResultado.querySelector(".modal-contenido .resultado");
+    mens.replaceChildren();
+    switch (estado) {
+      case "mostrar":
+        if (mens) mens.insertAdjacentHTML('beforeend', mensaje);
+        this.modalMostrarResultado.classList.remove("d-none");
+        break;
+      case "ocultar":
+        this.modalMostrarResultado.classList.add("d-none");
+        break;
+      default:
+        break;
+    }
+  }
 
   /**
    * 
@@ -134,7 +190,7 @@ class VideoSystemView {
 
       // guardar duracion y link, tiene que estar los dos, 
       // si es null el operador de encadenamiento opcional ? arregla poblemas que pueda haber 
-      const duration = document.querySelector("#duration")?.value;
+      const duration = Number.parseInt(document.querySelector("#duration")?.value || 0); // convertir a int
       const link = document.querySelector("#link")?.value;
       if (!duration && !link) return;
 
@@ -186,8 +242,8 @@ class VideoSystemView {
       event.preventDefault();
 
       // Guardar locations en array #newProductionLocation
-      const latitude = document.querySelector("#latitude")?.value;
-      const longitude = document.querySelector("#longitude")?.value;
+      const latitude = Number.parseFloat(document.querySelector("#latitude")?.value || 0); // tipo float
+      const longitude = Number.parseFloat(document.querySelector("#longitude")?.value || 0); // tipo float
       if (!latitude && !longitude) return;
       // guardar en objeto
       const location = { latitude, longitude };
@@ -321,8 +377,6 @@ class VideoSystemView {
    * Comprueba los campos obligatorios si todo ok habilita el botón Guardar
    */
   #checkFormValidity() {
-    const guardar = document.querySelector("#btnProduccionGuardar");
-    if (!guardar) return;
 
     const categoria = document.querySelector("#selectCategory")?.value;
     const tipo = document.querySelector("#selectPeliculaSerie")?.value;
@@ -348,7 +402,7 @@ class VideoSystemView {
     // habilita botón Guardar si los campos obligatorios son validos
     const valido = categoriaOk && tipoOk && tituloOk && publicationOk;
 
-    guardar.disabled = !valido;
+    this.btnGuardar.disabled = !valido;
   }
 
   /**
@@ -390,12 +444,6 @@ class VideoSystemView {
         return;
       }
 
-      // no cerrar al pulsar guardar dentro del modal
-      const guardar = event.target.closest("#btnProduccionGuardar");
-      if (guardar) {
-        event.preventDefault();
-        return;
-      }
 
       // click fuera del modal
       const clickFuera = event.target.classList.contains("modalContenedor");
@@ -423,7 +471,6 @@ class VideoSystemView {
 
     // botones
     const cancelar = document.querySelector("#btnProduccionCancelar");
-    const guardar = document.querySelector("#btnProduccionGuardar");
 
     // mostrar modal Produccion por secciones
     const unoProduction = document.querySelector("#modalUno");
@@ -437,9 +484,7 @@ class VideoSystemView {
         showAddProduction.classList.remove("d-none");
         showAddProduction.classList.add("d-block");
         // deshabilitar boton Guardar hasta que se valide el formulario
-        if (guardar) {
-          guardar.disabled = true;
-        }
+        this.btnGuardar.disabled = true;
 
         // cargar categorias dinamicamente
         // usar el value la clave de la categoria
@@ -452,6 +497,7 @@ class VideoSystemView {
         mensaje.textContent = "--Selecciona Categoria--";
         this.selectCategory.append(mensaje);
 
+        // crear select con las Categorias
         categorias.forEach(e => {
           const hijo = document.createElement("option");
           hijo.value = e.name || "";

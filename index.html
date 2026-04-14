@@ -46,7 +46,8 @@
       <!--
       Funcionamiento: 
       1.- Se selecciona Categoria id="modalUno" : se desoculta select para elegir serie o pelicula
-      2.- Se oculta select Categoria y aparece 
+      2.- Se selecciona Pelicula o Serie , si se selecciona Serie se pueden elegir las temporadas
+      3.- Si se ha rellenado el formulario correctamente se puede Guardar 
       -->
 
       <div id="modalAddProduction" class="modalContenedor d-none">
@@ -277,6 +278,18 @@
           <div class="d-flex justify-content-end ">
             <button class="btn btn-danger me-5">CANCELAR</button>
             <button class="btn btn-dark">GUARDAR</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- modal para mostrar mostrar resultado -->
+      <div id="modalMostrarResultado" class="modalContenedor d-none">
+        <div class="modal-contenido">
+          <span class="btnCerrar btn-close"></span>
+          <div class="resultado">
+
+
+
           </div>
         </div>
       </div>

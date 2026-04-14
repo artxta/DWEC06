@@ -701,6 +701,7 @@ let VideoSystem = (function () {
       // Movie o Serie
       resources = [],
       locations = [],
+      // Serie
       seasons = 0
     ) {
       // comprobar entrada

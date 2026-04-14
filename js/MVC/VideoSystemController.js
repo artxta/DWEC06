@@ -1,5 +1,8 @@
 "use strict";
 
+import { Coordinate } from "./modelo/VideoSystem/entities/Coordinate.js";
+import { Resource } from "./modelo/VideoSystem/entities/Resource.js";
+
 class VideoSystemController {
   // propiedades privadas
   #MODEL;
@@ -18,6 +21,7 @@ class VideoSystemController {
     this.#VIEW.bindShowFichaProduction(this.handleShowFichaProduction); // showFichaProduction - mostrar ficha produccion
     this.#VIEW.bindNewWindow(this.handleOpenInNewWindow); // abrir fichas en nueva ventana , arreglado para history
     this.#VIEW.bindShowModal(this.handleShowModal); // devolver datos para crear nueva produccion, borrar , asignar, etc
+    this.#VIEW.bindSaveProduction(this.handleSaveProduction); // guardar Nueva Produccion
 
     // añadir evento del historial
     window.addEventListener("popstate", (event) => {
@@ -52,6 +56,179 @@ class VideoSystemController {
       ) {
         history.pushState(objetoDatos, null);
       }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // handle para guardar Nueva Produccion
+  handleSaveProduction = (datosGuardar = {}) => {
+    /*
+       en Vista -> handle({
+          categoria: document.querySelector("#selectCategory")?.value,
+          tipo: document.querySelector("#selectPeliculaSerie")?.value,
+          titulo: document.querySelector("#titulo")?.value,
+          nacionalidad: document.querySelector("#nacionalidad")?.value,
+          publication: document.querySelector("#publication")?.value,
+          synopsis: document.querySelector("#synopsis")?.value,
+          imageName: document.querySelector("#inputFile")?.files[0]?.name || null,
+          seasons: document.querySelector("#seasons")?.value || 0,
+          resources: this.#newProductionResource,
+          locations: this.#newProductionLocation,
+          actores: this.#newProductionActors,
+          directores: this.#newProductionDirectors
+        });
+    */
+
+    try {
+      /* #MODEL.createProduction
+        title, // Obligatorio
+        publication, // obligatorio
+        nationality = "Sin Nacionalidad",
+        synopsis = "Sin synopsis",
+        image = "Sin imagen",
+        // Movie o Serie
+        resources = [],
+        locations = [],
+        // Serie
+        seasons = 0
+      */
+
+      let titulo = "";
+      let publication = "";
+      let capitulos = "";
+      let resources = [];
+      let locations = [];
+      if (datosGuardar.titulo) {
+        titulo = datosGuardar.titulo;
+      } else {
+        return;
+      }
+      if (datosGuardar.publication) {
+        publication = datosGuardar.publication;
+      } else {
+        return;
+      }
+
+      // el modelo solo crea una serie si tiene al menos 1 Capitulo
+      // si se crea una serie con 0 capitulos el modelo crea objeto Pelicula
+      // esto lo evita
+      if (datosGuardar.seasons <= 0 && datosGuardar.tipo === "SE") {
+        capitulos = 1;
+      } else {
+        capitulos = datosGuardar.seasons;
+      }
+
+      // crear array de resources
+      datosGuardar.resources.forEach(r => {
+        resources.push(new Resource(r.duration, r.link));
+      });
+
+      // crear array de locations
+      datosGuardar.locations.forEach(l => {
+        locations.push(new Coordinate(l.latitude, l.longitude));
+      });
+
+      // crear Producción
+      const produccionGuardada = this.#MODEL.createProduction(
+        titulo,
+        new Date(publication), // convertir a tipo Date
+        datosGuardar.nacionalidad,
+        datosGuardar.synopsis,
+        datosGuardar.imageName,
+        resources, // tipo array de Resources
+        locations, // tipo array de Coordinates
+        Number.parseInt(capitulos) // tipo int
+      );
+
+      // test
+      console.log("Nueva Produccion -Controlador-:");
+      console.dir(produccionGuardada);
+
+      // añadir produccion al sistema
+      this.#MODEL.addProduction(produccionGuardada);
+
+      // assignar Categoria, 
+      // buscar el objeto categoria
+      for (const categoria of this.#MODEL.categories) {
+        if (categoria.name === datosGuardar.categoria) {
+          this.#MODEL.assignCategory(categoria, produccionGuardada);
+          break;
+        }
+      }
+
+      // asignar actores
+      // buscar el objeto Actor
+      for (const actor of this.#MODEL.actors) {
+        for (const actorVista of datosGuardar.actores) {
+          //  si el la clave del actor coincide con el value de la vista(se ha usado la clave)
+          // asignar ese actor a la producción
+          if (`${actor.name}_${actor.lastname1}` === actorVista.value) {
+            // asignar actor a pelicula
+            this.#MODEL.assignActor(actor, produccionGuardada);
+          }
+        }
+      }
+
+      // asignar directores
+      for (const director of this.#MODEL.directors) {
+        for (const dirVista of datosGuardar.directores) {
+          //  si la clave del director coincide cn la clave usada en la vista 
+          // assignar ese director a la producción
+          if (`${director.name}_${director.lastname1}` === dirVista.value) {
+            // assignar director a la pelicula
+            this.#MODEL.assignDirector(director, produccionGuardada);
+          }
+        }
+      }
+
+      // test Ver casting de la pelicula
+      console.log("Ver Casting de la Nueva Producción: ")
+      for (const a of this.#MODEL.getCast(produccionGuardada)) {
+        console.log(`${a.name}`);
+      }
+
+      let resource = "";
+      let location = "";
+      let actor = "";
+      let director = "";
+      let tipo = (datosGuardar.tipo === "SE") ? "Serie" : "Pelicula";
+
+      datosGuardar.resources.forEach(e => {
+        resource += `<br>-Duración: ${e.duration}min., Link: ${e.link} `;
+      });
+
+      datosGuardar.locations.forEach(e => {
+        location += `<br>-Latitude: ${e.latitude}º, Longitude: ${e.longitude}º  `;
+      });
+
+      datosGuardar.actores.forEach(e => {
+        actor += `<br>-Nombre: ${e.nombre} `;
+      });
+
+      datosGuardar.directores.forEach(e => {
+        director += `<br>-Nombre: ${e.nombre} `;
+      });
+
+      this.#VIEW.showResultadoModal("mostrar", `
+        <h3>Nueva Producción Guardada:</h3>
+        <p>Categoria: ${datosGuardar.categoria}</p>
+        <p>Tipo: ${tipo}</p>
+        <p>Titulo: ${datosGuardar.titulo}</p>
+        <p>Nacionalidad: ${datosGuardar.nacionalidad}</p>
+        <p>Publication: ${datosGuardar.publication}</p>
+        <p>Synopsis: ${datosGuardar.synopsis}</p>
+        <p>Nombre Imagen: ${datosGuardar.imageName}</p>
+        <p>Temporadas: ${datosGuardar.seasons}</p>
+
+        <p>Resources: ${resource}</p>
+        <p>Locations: ${location}</p>
+        <p>Actores: ${actor}</p>
+        <p>Directores: ${director}</p>
+        <p>Capitulos: ${datosGuardar.seasons}</p>
+
+        `);
+
     } catch (e) {
       console.error(e);
     }
@@ -442,8 +619,10 @@ class VideoSystemController {
         // añadir todas producciones de la categoria
         for (const pro of cat.productions) {
 
-          // atributos que pueden o no pueden estar
-          const nationality = pro.nac || "";
+          // cambiar funcionamiento de fechas
+          const publicationRaw = pro.publication ?? pro.fecha;
+          const publication = publicationRaw instanceof Date ? publicationRaw : new Date(publicationRaw);
+          const nationality = pro.nationality ?? pro.nac ?? "";
           const synopsis = pro.synopsis || "";
           const image = pro.image || "";
           const resources = pro.resources || [];
@@ -452,7 +631,7 @@ class VideoSystemController {
           // crear
           const proCreada = this.#MODEL.createProduction(
             pro.title,
-            pro.fecha,
+            publication,
             nationality,
             synopsis,
             image,
@@ -465,15 +644,23 @@ class VideoSystemController {
           this.#MODEL.assignCategory(catCreada, proCreada);
 
           // crear y añadir todos los actores de cada produccion
-          for (const act of pro.actores) {
-            const actCreado = this.#MODEL.createPerson(act.name, act.lastN, act.born);
+          const actors = pro.actors || pro.actores || [];
+          for (const act of actors) {
+            const lastName = act.lastname1 ?? act.lastN ?? "";
+            const bornRaw = act.born;
+            const born = bornRaw instanceof Date ? bornRaw : new Date(bornRaw);
+            const actCreado = this.#MODEL.createPerson(act.name, lastName, born);
             this.#MODEL.addActor(actCreado);
             // assignar a este actor la producción actual
             this.#MODEL.assignActor(actCreado, proCreada);
           }
           // crear y añadir todos los directores de cada producción
-          for (const dir of pro.director) {
-            const dirCreado = this.#MODEL.createPerson(dir.name, dir.lastN, dir.born);
+          const directors = pro.directors || pro.director || [];
+          for (const dir of directors) {
+            const lastName = dir.lastname1 ?? dir.lastN ?? "";
+            const bornRaw = dir.born;
+            const born = bornRaw instanceof Date ? bornRaw : new Date(bornRaw);
+            const dirCreado = this.#MODEL.createPerson(dir.name, lastName, born);
             this.#MODEL.addDirector(dirCreado);
             // assignar a este director la producción actual
             this.#MODEL.assignDirector(dirCreado, proCreada);
