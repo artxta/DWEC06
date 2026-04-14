@@ -22,6 +22,7 @@ class VideoSystemController {
     this.#VIEW.bindNewWindow(this.handleOpenInNewWindow); // abrir fichas en nueva ventana , arreglado para history
     this.#VIEW.bindShowModal(this.handleShowModal); // devolver datos para crear nueva produccion, borrar , asignar, etc
     this.#VIEW.bindSaveProduction(this.handleSaveProduction); // guardar Nueva Produccion
+    this.#VIEW.bindShowDeleteProductionModal(this.handleShowDeleteProductionModal); // mostrar Borrar produccion
 
     // añadir evento del historial
     window.addEventListener("popstate", (event) => {
@@ -55,6 +56,44 @@ class VideoSystemController {
         history.state?.action !== objetoDatos.action
       ) {
         history.pushState(objetoDatos, null);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // handle para borrar producción
+  handleShowDeleteProductionModal = (comando, seleccion = "") => {
+    try {
+      switch (comando) {
+        case "cargar":
+          // mostrar modal Borrar Production
+          this.#VIEW.showDeleteProductionModal(this.#MODEL.productions);
+          break;
+        case "verImagen":
+          if (seleccion !== "") {
+            this.#VIEW.showDeleteProductionModal(this.#MODEL.productions, seleccion);
+          }
+          break;
+        case "borrar": {
+          if (seleccion === "") return;
+
+          let productionSeleccionada = null;
+          // buscar produccion
+          for (const production of this.#MODEL.productions) {
+            if (production.title === seleccion) {
+              productionSeleccionada = production;
+              break;
+            }
+          }
+          // salir si no existe
+          if (!productionSeleccionada) return;
+          // borrar produccion
+          this.#MODEL.removeProduction(productionSeleccionada);
+          // mostrar confirmación del borrado
+          this.#VIEW.showResultadoModal("mostrar", `<h4>Producción borrada: ${seleccion}</h4>`);
+          break;
+        }
       }
     } catch (e) {
       console.error(e);

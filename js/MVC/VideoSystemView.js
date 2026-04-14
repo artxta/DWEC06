@@ -24,6 +24,9 @@ class VideoSystemView {
     this.selectDirector = document.querySelector("#selectDirector");
     this.btnGuardar = document.querySelector("#btnProduccionGuardar");
 
+    this.selectBorrar = document.querySelector("#selectdeleteProduction");
+    this.btnDeleteProduction = document.querySelector("#btnDeleteProduction");
+
     // La operación se ha completado
     this.modalMostrarResultado = document.querySelector("#modalMostrarResultado");
 
@@ -44,6 +47,102 @@ class VideoSystemView {
     this.showFormulariosTema6();
 
   };
+
+
+
+  // bind showDeleteProductionModal
+  bindShowDeleteProductionModal(handle) {
+    try {
+      // crear evento click llama a > al manejador>llama a showDeleteProductionModal
+      this.main.addEventListener("click", (event) => {
+        const btnDeleteProduction = event.target.closest("#removeProduction");
+        if (!btnDeleteProduction) return;
+        // llamar al manejador
+        handle("cargar");
+      });
+
+      // al selecciona una producción ver su imagen
+      this.selectBorrar.addEventListener("change", (event) => {
+        // ver imagen de la producción
+        if (event.target.value !== "") {
+          handle("verImagen", event.target.value);
+        }
+      });
+
+      this.btnDeleteProduction.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (this.selectBorrar.value !== "") {
+          const seleccion = this.selectBorrar.value;
+          const confirmar = window.confirm(`¿Seguro que quieres borrar la producción \"${seleccion}\"?`);
+          if (confirmar) {
+            handle("borrar", seleccion);
+          }
+        }
+      });
+
+    } catch (e) {
+      this.showResultadoModal("mostrar", `Ha ocurrido un error: ` + e);
+    }
+  }
+
+
+  // Mostrar Modal DeleteProduction
+  showDeleteProductionModal(productions, imagenSeleccionada = "") {
+    try {
+      const modalDelete = document.querySelector("#deleteProduction");
+      const divImagenProduccion = document.querySelector(".imagen-produccion");
+      const productionsArray = Array.from(productions || []);
+      // mostrar modal
+      modalDelete.classList.remove("d-none");
+      modalDelete.classList.add("d-block");
+
+      // limpiar imagen anterior al volver a pintar
+      if (divImagenProduccion) {
+        divImagenProduccion.replaceChildren();
+      }
+
+      // llenar option
+      // resetear option
+      this.selectBorrar.replaceChildren();
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "--Selecciona Producción--";
+      this.selectBorrar.append(option);
+
+      // si hay datos
+      if (productionsArray.length > 0) {
+
+        // llenar select con las producciones
+        productionsArray.forEach(e => {
+          const option = document.createElement("option");
+          option.value = e.title;
+          option.textContent = e.title;
+          if (e.title === imagenSeleccionada) {
+            option.selected = true;
+          }
+          this.selectBorrar.append(option);
+        });
+      }
+
+      // cambiar imagen produccion
+      if (imagenSeleccionada !== "") {
+        // buscar la imagen
+        productionsArray.forEach(p => {
+          if (p.title === imagenSeleccionada) {
+            const imagenProduccion = new Image();
+            imagenProduccion.alt = "Imagen Producción";
+            imagenProduccion.width = 200;
+            imagenProduccion.src = `https://placehold.co/200x300/grey/white?text=${p.image}`;
+            // insertar imagen en el divImagenProducción
+            divImagenProduccion.append(imagenProduccion);
+          }
+        });
+      }
+
+    } catch (e) {
+      this.showResultadoModal("mostrar", `Ha ocurrido un error: ` + e);
+    }
+  }
 
   // guardar nueva producción
   bindSaveProduction(handle) {
@@ -437,7 +536,7 @@ class VideoSystemView {
       }
 
       // boton cancelar
-      const cancelar = event.target.closest("#btnProduccionCancelar");
+      const cancelar = event.target.closest("#btnCancelar");
       if (cancelar) {
         event.preventDefault();
         this.closeAllModals();
@@ -465,15 +564,8 @@ class VideoSystemView {
     // mostrar modal y sus secciones
     // 
     const showAddProduction = document.querySelector("#modalAddProduction");
-    const deleteProduction = document.querySelector("#deleteProduction");
-    const assignProduction = document.querySelector("#asignDirectorActor");
-
-
-    // botones
-    const cancelar = document.querySelector("#btnProduccionCancelar");
 
     // mostrar modal Produccion por secciones
-    const unoProduction = document.querySelector("#modalUno");
     const dosProduction = document.querySelector("#modalDos");
     const tresProduction = document.querySelector("#modalTres");
     const cuatroProduction = document.querySelector("#modalCuatro");
@@ -559,14 +651,7 @@ class VideoSystemView {
         cuatroProduction.classList.remove("d-none");
         cuatroProduction.classList.add("d-block");
         break;
-
-
-
-
     }
-
-
-
 
   }
 
@@ -1042,11 +1127,11 @@ class VideoSystemView {
         });
       }
 
-      // mostrar resources
+      // mostrar resource
       // mostrar detalles producción
       // console.warn("Detalles de la producción:");
       // console.dir(production);
-      // si tiene resources mostrarlos
+      // si tiene resource mostrarlos
       if (production.resource && production.resource.length > 0) {
         html += `<hr>
                 <h4>Resources:</h4>
