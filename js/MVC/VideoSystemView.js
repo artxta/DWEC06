@@ -843,7 +843,7 @@ class VideoSystemView {
       }
 
       // boton cancelar
-      const cancelar = event.target.closest("#btnCancelar");
+      const cancelar = event.target.closest(".btnCancelar");
       if (cancelar) {
         event.preventDefault();
         this.closeAllModals();
