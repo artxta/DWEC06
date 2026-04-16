@@ -12,6 +12,10 @@ class VideoSystemView {
   #newProductionActors = [];
   #newProductionDirectors = [];
 
+  // arrays para asignar actores/directores
+  #assignActores = [];
+  #assignDirectores = [];
+
   constructor() {
     this.nav = document.getElementById("navID");
     this.main = document.getElementById("mainID");
@@ -26,6 +30,17 @@ class VideoSystemView {
 
     this.selectBorrar = document.querySelector("#selectdeleteProduction");
     this.btnDeleteProduction = document.querySelector("#btnDeleteProduction");
+
+    // modal asignar actor/director
+    this.asignDirectorActor = document.querySelector("#asignDirectorActor");
+    // select asignar Produccion
+    this.selectAsignProduction = document.querySelector("#selectAsignProduction");
+    // select asignar Actor
+    this.selectAsignActor = document.querySelector("#selectAsignActor")
+    // select asignar Director
+    this.selectAsignDirector = document.querySelector("#selectAsignDirector");
+    // boton assingr Guardar
+    this.btnGuardarAsign = document.querySelector("#btnGuardarAsign");
 
     // La operación se ha completado
     this.modalMostrarResultado = document.querySelector("#modalMostrarResultado");
@@ -48,7 +63,270 @@ class VideoSystemView {
 
   };
 
+  // bind para crear eventos para Asignar actores/Directores
+  bindShowAssignActores(handle) {
+    try {
+      this.main.addEventListener("click", (event) => {
 
+        // evento ver Modal Asignar actor/director
+        const btnAsignProduction = event.target.closest("#btnAsignProduction");
+        if (!btnAsignProduction) return;
+        // llamar al manejador
+        handle("cargar");
+
+      });
+
+      // evento asign produccion
+      this.selectAsignProduction.addEventListener("change", () => {
+        const contenedor = document.querySelector(".actoresAsignados");
+        const mostrarActoresDirectores = document.querySelector(".assignActoresDirectores");
+
+        // datos a enviar (nombre producción)
+        const datosEnviar = { produccion: this.selectAsignProduction.value, };
+        // guardar actores y directores de esa produccion
+        const datosRecibir = handle("casting", datosEnviar);
+
+        // recibir datos
+        const actores = datosRecibir.actores;
+        const directores = datosRecibir.directores;
+        // guardar en array
+        this.#assignActores = actores;
+        this.#assignDirectores = directores;
+
+        // mostrar actores y directores
+        mostrarActoresDirectores.classList.remove("d-none");
+
+        // 
+        // ver actores y directores
+        this.#showActoresAndDirectores();
+        // comprobar boton guardar
+        if (!this.#checkFormValidity()) {
+          contenedor.replaceChildren();
+          const p = document.createElement("p");
+          p.className = "text-danger";
+          p.textContent = "Selecciona una Produccion y \"Añade\" al menos un actor o un director para habilitar el botón Guardar";
+          contenedor.append(p);
+        }
+      });
+
+      // evento asign actor
+      this.selectAsignActor.addEventListener("change", (event) => {
+        // comprobar boton guardar  
+
+        if (!this.#checkFormValidity()) {
+          const contenedor = document.querySelector(".actoresAsignados");
+          contenedor.replaceChildren();
+          const p = document.createElement("p");
+          p.className = "text-danger";
+          p.textContent = "Selecciona una Produccion y \"Añade\" al menos un actor o un director para habilitar el botón Guardar";
+          contenedor.append(p);
+        }
+      });
+
+      // boton añadir actor , para fijarme en el funcionamiento de nueva produccion y hacerlo igual
+      /*
+      const contenedor = document.querySelector(".resourcesSeleccionados");
+      if (contenedor) {
+        contenedor.replaceChildren();
+        this.#newProductionResource.forEach((r, i) => {
+          const span = document.createElement("span");
+          // estilo etiqueta tipo capsula
+          span.className = "badge bg-secondary me-1 mt-1";
+          span.textContent = `Resource ${i + 1}: ${r.duration}min - ${r.link}`;
+          contenedor.append(span);
+        });
+      }
+      this.#checkFormValidity();
+      */
+      const btnAddAsignActor = document.querySelector("#btnAddAsignActor");
+      btnAddAsignActor.addEventListener("click", (event) => {
+        event.preventDefault();
+        // asignar actor
+        if (this.selectAsignActor.value !== "") {
+          // comprobar que no se ha seleccionado ya ese actor
+          if (!this.#assignActores.includes(this.selectAsignActor.value)) {
+            // añadir al array de actores asignados
+            this.#assignActores.push(this.selectAsignActor.value);
+          }
+        }
+        // ver actores y directores
+        this.#showActoresAndDirectores();
+      });
+
+      // boton borrar actor
+      const btnDeleteAsignActor = document.querySelector("#btnDeleteAsignActor");
+      btnDeleteAsignActor.addEventListener("click", (event) => {
+        event.preventDefault();
+        // quitar ultimo actor
+        this.#assignActores.pop();
+        // ver actores y directores
+        this.#showActoresAndDirectores();
+      });
+
+      // // evento asign director
+      this.selectAsignDirector.addEventListener("change", (event) => {
+        // comprobar boton guardar
+        if (!this.#checkFormValidity()) {
+          const contenedorDirector = document.querySelector(".directoresAsignados");
+          contenedorDirector.replaceChildren();
+          const p = document.createElement("p");
+          p.className = "text-danger";
+          p.textContent = "Selecciona una Produccion y \"Añade\" al menos un actor o un director para habilitar el botón Guardar";
+          contenedorDirector.append(p);
+        }
+      });
+
+      // // boton añadir director
+      const btnAddAsignDirector = document.querySelector("#btnAddAsignDirector");
+      btnAddAsignDirector.addEventListener("click", (event) => {
+        event.preventDefault();
+        // asignar director
+        if (this.selectAsignDirector.value !== "") {
+          // comprobar que no se haya seleccionado ya ese director
+          if (!this.#assignDirectores.includes(this.selectAsignDirector.value)) {
+            this.#assignDirectores.push(this.selectAsignDirector.value);
+          }
+        }
+        // mostrar actores y directores
+        this.#showActoresAndDirectores();
+
+      });
+
+      // // boton borrar director
+      const btnDeleteAsignDirector = document.querySelector("#btnDeleteAsignDirector");
+      btnDeleteAsignDirector.addEventListener("click", (event) => {
+        // borrar ultimo director
+        this.#assignDirectores.pop();
+        // mostrar directores y actores
+        this.#showActoresAndDirectores();
+      });
+
+      // // boton guardar asignación
+      this.btnGuardarAsign.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const datos = {
+          produccion: this.selectAsignProduction.value,
+          actores: this.#assignActores,
+          directores: this.#assignDirectores
+        };
+
+        // llamar al handle
+        handle("guardar", datos);
+      });
+
+    } catch (e) {
+      console.error(`Error: ${e}`);
+    }
+  }
+
+  /**
+   * Muestra los directores y actores que tiene una producción en el modal de Asignar Actores/Directores
+   */
+  #showActoresAndDirectores() {
+    // mostrar los directores
+    const contenedorDirector = document.querySelector(".directoresAsignados");
+    if (contenedorDirector) {
+      // borrar lo que habia antes
+      contenedorDirector.replaceChildren();
+
+      this.#assignDirectores.forEach((dir, index) => {
+        const span = document.createElement("span");
+        span.className = "badge bg-secondary me-1 mt-1";
+        span.textContent = `Director ${index + 1}: ${dir}`;
+        contenedorDirector.append(span);
+      });
+    }
+
+    // mostrar los actores seleccionados
+    const contenedor = document.querySelector(".actoresAsignados");
+    if (contenedor) {
+      contenedor.replaceChildren(); // borrar contenido anterior
+      // mostrar los actores seleccionados
+      this.#assignActores.forEach((actor, index) => {
+        const span = document.createElement("span");
+        // añade estas clases
+        span.className = "badge bg-secondary me-1 mt-1";
+        span.textContent = `Actor ${index + 1}:   ${actor}`;
+        contenedor.append(span);
+      });
+    }
+    // comprobar boton guardar
+    this.#checkFormValidity();
+
+  }
+
+  /**
+   * mostrar el modal para asignar a produccion Actores/directores
+   * @param {*} producciones 
+   * @param {*} actores 
+   * @param {*} directores 
+   */
+  showAssignActores(producciones, actores, directores) {
+    try {
+      // mostrar modal para asignar actores
+      this.asignDirectorActor.classList.remove("d-none");
+      this.asignDirectorActor.classList.add("d-block");
+
+      // select Producciones
+      // resetear productions
+      this.selectAsignProduction.replaceChildren();
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "--Selecciona Produccion--";
+      option.disabled = true;
+      option.selected = true;
+      this.selectAsignProduction.append(option);
+
+      // rellenar producions
+      producciones.forEach(p => {
+        const option = document.createElement("option");
+        option.value = p.title;
+        option.textContent = p.title;
+        this.selectAsignProduction.append(option);
+      });
+
+      // select para actores
+      // resetear Productions
+      this.selectAsignActor.replaceChildren();
+      const optionActor = document.createElement("option");
+      optionActor.value = "";
+      optionActor.textContent = "--Selecciona Actor--";
+      optionActor.disabled = true;
+      optionActor.selected = true;
+      this.selectAsignActor.append(optionActor);
+
+      // rellenar actors
+      actores.forEach(a => {
+        const option = document.createElement("option");
+        option.value = `${a.name}_${a.lastname1}`;
+        option.textContent = `${a.name} ${a.lastname1}`;
+        this.selectAsignActor.append(option);
+      });
+
+      // select para directores
+      this.selectAsignDirector.replaceChildren();
+      const optionDirector = document.createElement("option");
+      optionDirector.value = "";
+      optionDirector.textContent = "--Selecciona Director--";
+      optionDirector.disabled = true;
+      optionDirector.selected = true;
+      this.selectAsignDirector.append(optionDirector);
+
+      // rellenar directores
+      directores.forEach(d => {
+        const option = document.createElement("option");
+        option.value = `${d.name}_${d.lastname1}`;
+        option.textContent = `${d.name} ${d.lastname1}`;
+        this.selectAsignDirector.append(option);
+      });
+
+
+
+    } catch (e) {
+      this.showResultadoModal("mostrar", `Ha ocurrido un error: ` + e);
+    }
+  }
 
   // bind showDeleteProductionModal
   bindShowDeleteProductionModal(handle) {
@@ -69,6 +347,7 @@ class VideoSystemView {
         }
       });
 
+      // boton borrar producción
       this.btnDeleteProduction.addEventListener("click", (event) => {
         event.preventDefault();
         if (this.selectBorrar.value !== "") {
@@ -107,6 +386,8 @@ class VideoSystemView {
       const option = document.createElement("option");
       option.value = "";
       option.textContent = "--Selecciona Producción--";
+      option.disabled = true;
+      option.selected = true;
       this.selectBorrar.append(option);
 
       // si hay datos
@@ -487,9 +768,20 @@ class VideoSystemView {
     const tipoOk = !!tipo;
     const tituloOk = !!titulo;
     const publicationOk = !!publication;
-    const resourceOk = this.#newProductionResource.length > 0;
-    const actoresOk = this.#newProductionActors.length > 0;
-    const directoresOk = this.#newProductionDirectors.length > 0;
+
+    // validar formulario assign Actores/Directores
+    const selectAsignProduction = document.querySelector("#selectAsignProduction")?.value;
+
+    // habilitar boton guardar si se ha seleccionado una producción y al menos un actor o un director
+    if (selectAsignProduction && (this.#assignActores.length > 0 || this.#assignDirectores.length > 0)) {
+      this.btnGuardarAsign.disabled = false;
+      // devolver true para validar
+      return true;
+    } else {
+      this.btnGuardarAsign.disabled = true;
+      // devolder false para no validar
+      return false;
+    }
 
     // si es serie
     let seasonsOk = true;
@@ -587,6 +879,8 @@ class VideoSystemView {
         const mensaje = document.createElement("option");
         mensaje.value = "";
         mensaje.textContent = "--Selecciona Categoria--";
+        mensaje.disabled = true;
+        mensaje.selected = true;
         this.selectCategory.append(mensaje);
 
         // crear select con las Categorias
@@ -620,6 +914,8 @@ class VideoSystemView {
         const placeholderActor = document.createElement("option");
         placeholderActor.value = "";
         placeholderActor.textContent = "--Selecciona Actor--";
+        placeholderActor.disabled = true;
+        placeholderActor.selected = true;
         this.selectActor.append(placeholderActor);
 
         // crear los options de actores
@@ -635,6 +931,8 @@ class VideoSystemView {
         const placeholderDirector = document.createElement("option");
         placeholderDirector.value = "";
         placeholderDirector.textContent = "--Selecciona Director--";
+        placeholderDirector.disabled = true;
+        placeholderDirector.selected = true;
         this.selectDirector.append(placeholderDirector);
 
         // añadir los options de directores
@@ -687,7 +985,7 @@ class VideoSystemView {
       <div class="col-12 col-md-12 text-center">
         <h6 class="mb-3 text-white">Asignar Actores/Directores a Producción</h6>
         <div class="d-grid">
-          <button id="asignProduction" class="btn btn-success py-3">
+          <button id="btnAsignProduction" class="btn btn-success py-3">
             Asignar Actores/Directores
           </button>
         </div>

@@ -23,6 +23,7 @@ class VideoSystemController {
     this.#VIEW.bindShowModal(this.handleShowModal); // devolver datos para crear nueva produccion, borrar , asignar, etc
     this.#VIEW.bindSaveProduction(this.handleSaveProduction); // guardar Nueva Produccion
     this.#VIEW.bindShowDeleteProductionModal(this.handleShowDeleteProductionModal); // mostrar Borrar produccion
+    this.#VIEW.bindShowAssignActores(this.handleShowAssignActores); //mostrar modal asignar actores/directores
 
     // añadir evento del historial
     window.addEventListener("popstate", (event) => {
@@ -56,6 +57,117 @@ class VideoSystemController {
         history.state?.action !== objetoDatos.action
       ) {
         history.pushState(objetoDatos, null);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // handle para asignar actores/directores
+  handleShowAssignActores = (comando, parametros = {}) => {
+    try {
+      switch (comando) {
+        case "cargar":
+          // mostrar formulario producciones/actores/directores
+          this.#VIEW.showAssignActores(
+            this.#MODEL.productions,
+            this.#MODEL.actors,
+            this.#MODEL.directors
+          );
+          break;
+        case "casting":
+          // enviar en un objeto actores, directores de una produccion
+          const value = parametros.produccion;
+          // variables
+          let produccion;
+          let directores = [];
+          let actores = [];
+
+          // producciones
+          this.#MODEL.productions.forEach(p => {
+            // produccion es el objeto de la producción
+            if (p.title === value) {
+              produccion = p;
+            }
+          });
+
+          // directores de esa producción
+          this.#MODEL.directors.forEach(d => {
+            this.#MODEL.getProductionsDirector(d).forEach(prod => {
+              if (prod === produccion) {
+                // guardar clave
+                directores.push(`${d.name}_${d.lastname1}`);
+              }
+            });
+          });
+
+          // actores
+          this.#MODEL.getCast(produccion).forEach(actor => {
+            actores.push(`${actor.name}_${actor.lastname1}`);
+          });
+
+
+          // devuelve los actores y directores de esa producción
+          return {
+            actores: actores,
+            directores: directores
+          };
+
+          break;
+        case "guardar":
+          // como recibe los datos desde Vista
+          /*
+            const datos = {
+            produccion: this.selectAsignProduction,
+            actores: this.#assignActores,
+            directores: this.#assignDirectores
+          };
+  
+          // llamar al handle
+          handle("guardar", datos);
+            */
+
+          // asignar Actores a Produccion
+          console.log("Asignar Actor/Director:");
+          console.dir(parametros);
+
+          let prod = null;
+
+          // guardar produccion como objeto
+          this.#MODEL.productions.forEach(pro => {
+            if (pro.title === parametros.produccion) prod = pro;
+          });
+
+          // recorre todos los actores, y tambien recorre los actores que se quieren asignar
+          // si coincide que un actor es de los que se quiere asignar
+          // ejecuta el comando asignarActor a la producción con ese actor
+          this.#MODEL.actors.forEach(actor => {
+            for (const actorAsignado of parametros.actores) {
+              const clave = `${actor.name}_${actor.lastname1}`;
+              // añadir actor a producción
+              if (clave === actorAsignado) {
+                this.#MODEL.assignActor(actor, prod);
+              }
+            }
+          });
+
+          // asignar Directores a Producción, el mismo sistema que actores
+          this.#MODEL.directors.forEach(director => {
+            for (const direcAsignado of parametros.directores) {
+              const clave = `${director.name}_${director.lastname1}`;
+              // añadir director a producción
+              if (clave === direcAsignado) {
+                this.#MODEL.assignDirector(director, prod);
+              }
+            }
+          });
+
+          // crear confirmación
+          this.#VIEW.showResultadoModal("mostrar", `<h4>Asignación realizada a la producción: ${parametros.produccion}</h4>`);
+
+          break;
+        default:
+          break;
       }
     } catch (e) {
       console.error(e);

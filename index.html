@@ -81,7 +81,7 @@
                   <div>
                     <label for="selectCategory">Selecciona Categoría: </label>
                     <select name="selectCategory" id="selectCategory">
-                      <option value="">--Selecciona Categoria--</option>
+                      <option value="" disabled selected>--Selecciona Categoria--</option>
                     </select>
                   </div>
 
@@ -95,7 +95,7 @@
                 <li>
                   <label for="">Elije Pelicula o Serie:</label>
                   <select name="selectPeliculaSerie" id="selectPeliculaSerie">
-                    <option value="">--Elige Pelicula o Serie--</option>
+                    <option value="" disabled selected>--Elige Pelicula o Serie--</option>
                     <option value="MO">Pelicula</option>
                     <option value="SE">Serie</option>
                   </select>
@@ -175,7 +175,7 @@
                   <div>
                     <label for="actor">Actor:</label>
                     <select name="selectActor" id="selectActor">
-                      <option value="">--Elige Actores--</option>
+                      <option value="" disabled selected>--Elige Actores--</option>
                     </select>
                     <button type="button" id="btnAddActores" class="btn btn-primary">Añadir Actor</button>
                     <button type="button" id="btnDeleteActores" class="btn btn-danger">Borrar Actores</button>
@@ -189,7 +189,7 @@
                   <div>
                     <label for="director">Director: </label>
                     <select name="selectDirector" id="selectDirector">
-                      <option value="">--Elige Director--</option>
+                      <option value="" disabled selected>--Elige Director--</option>
                     </select>
                     <button type="button" id="btnAddDirector" class="btn btn-primary">Añadir Director</button>
                     <button type="button" id="btnDeleteDirector" class="btn btn-danger">Borrar Director</button>
@@ -251,32 +251,58 @@
       <div id="asignDirectorActor" class="modalContenedor d-none">
         <div class="modal-contenido">
           <span class="btnCerrar btn-close"></span>
-          <h5>Formulario asignar Actores/Directores:</h5>
+          <h5>Formulario asignar/desasignar Actores/Directores:</h5>
 
-          <!-- Actores -->
-          <div>
-            <select name="asignActor" id="asignActor">
-              <option value="">--Selecciona Actor--</option>
+          <!-- Producciones -->
+          <div class="mb-3">
+            <label for="asignProduction" class="form-label">Producción:</label>
+            <select name="asignProduction" id="selectAsignProduction" required>
+              <option value="" disabled selected>--Selecciona Produccion--</option>
             </select>
-            <button>Añadir Actor</button>
-            <button>Borrar Actor</button>
-            <!-- ver Actores asignados -->
           </div>
 
-          <!-- Directores -->
-          <div>
-            <select name="asignDirector" id="asignDirector">
-              <option value="">--Selecciona Director</option>
-            </select>
-            <button>Añadir Director</button>
-            <button>Borrar Director</button>
-            <!-- ver Directores asignados -->
+          <div class="assignActoresDirectores d-none">
+
+            <!-- Actores -->
+            <div class="mb-3">
+              <label for="asignActor" class="form-label">Elige Actores:</label>
+              <div class="d-flex gap-2 align-items-center">
+                <select name="asignActor" id="selectAsignActor">
+                  <option value="" disabled selected>--Selecciona Actor--</option>
+                </select>
+                <button type="button" id="btnAddAsignActor" class="btn btn-primary text-nowrap">Añadir Actor</button>
+                <button type="button" id="btnDeleteAsignActor" class="btn btn-danger text-nowrap">Borrar
+                  Actores</button>
+              </div>
+              <!-- ver Actores asignados -->
+              Actores Asignados:
+              <div class="actoresAsignados mt-2"></div>
+            </div>
+
+            <!-- Directores -->
+            <div class="mb-3">
+              <label for="asignDirector" class="form-label">Elige Directores:</label>
+              <div class="d-flex gap-2 align-items-center">
+                <select name="asignDirector" id="selectAsignDirector">
+                  <option value="" disabled selected>--Selecciona Director--</option>
+                </select>
+                <button type="button" id="btnAddAsignDirector" class="btn btn-primary text-nowrap">Añadir
+                  Director</button>
+                <button type="button" id="btnDeleteAsignDirector" class="btn btn-danger text-nowrap">Borrar
+                  Directores</button>
+              </div>
+              <!-- ver Directores asignados -->
+              Directores Asignados:
+              <div class="directoresAsignados mt-2"></div>
+            </div>
+
           </div>
+
 
           <!-- botones  -->
-          <div class="d-flex justify-content-end ">
-            <button type="button" id="btnCancelar" class="btn btn-danger me-5">CANCELAR</button>
-            <button type="button" class="btn btn-dark">GUARDAR</button>
+          <div class="d-flex justify-content-end gap-3">
+            <button type="button" id="btnCancelar" class="btn btn-danger">CANCELAR</button>
+            <button type="button" id="btnGuardarAsign" class="btn btn-dark" disabled>GUARDAR</button>
           </div>
         </div>
       </div>
