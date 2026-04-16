@@ -213,6 +213,8 @@ class VideoSystemView {
 
         // llamar al handle
         handle("guardar", datos);
+        // resetear 
+        this.#showActoresAndDirectores(true);
       });
 
     } catch (e) {
@@ -223,33 +225,45 @@ class VideoSystemView {
   /**
    * Muestra los directores y actores que tiene una producción en el modal de Asignar Actores/Directores
    */
-  #showActoresAndDirectores() {
-    // mostrar los directores
+  #showActoresAndDirectores(resetear = false) {
+
+    // variables
     const contenedorDirector = document.querySelector(".directoresAsignados");
-    if (contenedorDirector) {
-      // borrar lo que habia antes
-      contenedorDirector.replaceChildren();
-
-      this.#assignDirectores.forEach((dir, index) => {
-        const span = document.createElement("span");
-        span.className = "badge bg-secondary me-1 mt-1";
-        span.textContent = `Director ${index + 1}: ${dir}`;
-        contenedorDirector.append(span);
-      });
-    }
-
-    // mostrar los actores seleccionados
     const contenedor = document.querySelector(".actoresAsignados");
-    if (contenedor) {
-      contenedor.replaceChildren(); // borrar contenido anterior
+
+    // resetear arrays y html
+    if (resetear) {
+      this.#assignActores = [];
+      this.#assignDirectores = [];
+      if (contenedorDirector) contenedorDirector.replaceChildren();
+
+    } else {
+
+      // mostrar los directores
+      if (contenedorDirector) {
+        // borrar lo que habia antes
+        contenedorDirector.replaceChildren();
+
+        this.#assignDirectores.forEach((dir, index) => {
+          const span = document.createElement("span");
+          span.className = "badge bg-secondary me-1 mt-1";
+          span.textContent = `Director ${index + 1}: ${dir}`;
+          contenedorDirector.append(span);
+        });
+      }
+
       // mostrar los actores seleccionados
-      this.#assignActores.forEach((actor, index) => {
-        const span = document.createElement("span");
-        // añade estas clases
-        span.className = "badge bg-secondary me-1 mt-1";
-        span.textContent = `Actor ${index + 1}:   ${actor}`;
-        contenedor.append(span);
-      });
+      if (contenedor) {
+        contenedor.replaceChildren(); // borrar contenido anterior
+        // mostrar los actores seleccionados
+        this.#assignActores.forEach((actor, index) => {
+          const span = document.createElement("span");
+          // añade estas clases
+          span.className = "badge bg-secondary me-1 mt-1";
+          span.textContent = `Actor ${index + 1}:   ${actor}`;
+          contenedor.append(span);
+        });
+      }
     }
     // comprobar boton guardar
     this.#checkFormValidity();
@@ -772,17 +786,6 @@ class VideoSystemView {
     // validar formulario assign Actores/Directores
     const selectAsignProduction = document.querySelector("#selectAsignProduction")?.value;
 
-    // habilitar boton guardar si se ha seleccionado una producción y al menos un actor o un director
-    if (selectAsignProduction && (this.#assignActores.length > 0 || this.#assignDirectores.length > 0)) {
-      this.btnGuardarAsign.disabled = false;
-      // devolver true para validar
-      return true;
-    } else {
-      this.btnGuardarAsign.disabled = true;
-      // devolder false para no validar
-      return false;
-    }
-
     // si es serie
     let seasonsOk = true;
     if (tipo === "SE") {
@@ -794,6 +797,18 @@ class VideoSystemView {
     const valido = categoriaOk && tipoOk && tituloOk && publicationOk;
 
     this.btnGuardar.disabled = !valido;
+
+
+    // habilitar boton guardar si se ha seleccionado una producción y al menos un actor o un director
+    if (selectAsignProduction && (this.#assignActores.length > 0 || this.#assignDirectores.length > 0)) {
+      this.btnGuardarAsign.disabled = false;
+      // devolver true para validar
+      return true;
+    } else {
+      this.btnGuardarAsign.disabled = true;
+      // devolder false para no validar
+      return false;
+    }
   }
 
   /**
